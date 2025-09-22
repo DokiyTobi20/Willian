@@ -142,25 +142,34 @@ window.AppCore = AppCore;
         },
 
         loadModuleScript(scriptName) {
+            // Eliminar cualquier script dinámico previo
             const oldScript = document.getElementById('dynamic-view-script');
-            if (oldScript) oldScript.remove();
+            if (oldScript) {
+                oldScript.remove();
+                // Forzar limpieza de memoria del script anterior
+                try {
+                    delete window.abrirModalEditarConsulta;
+                    delete window.cerrarModalConsulta;
+                } catch {}
+            }
 
             const moduleContainer = this.contenedor.querySelector('[data-module]');
             const moduleName = moduleContainer ? moduleContainer.dataset.module : null;
 
             if (scriptName) {
-                const newScript = document.createElement('script');
-                newScript.id = 'dynamic-view-script';
-                // Importante: como Panel.php está en /panel/, hay que salir al nivel raíz para acceder a doctores/, citas/, etc.
-                newScript.src = `../${scriptName}?v=${Date.now()}`;
-                newScript.onload = () => {
-                    if (moduleName) {
-                        AppCore.initModule(moduleName);
-                    }
-                };
-                document.body.appendChild(newScript);
+                // Verificar que no exista ya un script igual
+                if (!document.getElementById('dynamic-view-script')) {
+                    const newScript = document.createElement('script');
+                    newScript.id = 'dynamic-view-script';
+                    newScript.src = `../${scriptName}?v=${Date.now()}`;
+                    newScript.onload = () => {
+                        if (moduleName) {
+                            AppCore.initModule(moduleName);
+                        }
+                    };
+                    document.body.appendChild(newScript);
+                }
             } else if (moduleName) {
-                // Si no hay script explícito pero la vista tiene un módulo declarado
                 AppCore.initModule(moduleName);
             }
         },
