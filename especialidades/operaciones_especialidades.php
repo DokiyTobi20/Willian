@@ -125,9 +125,6 @@ try {
     $response = [];
 
     switch ($accion) {
-        case 'listar_todas':
-            $response = $repo->listar();
-            break;
         case 'listar':
             $response = $repo->listar();
             break;

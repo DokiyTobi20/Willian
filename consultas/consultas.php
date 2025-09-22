@@ -5,29 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Consultas</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="consultas.css">
+    <link rel="stylesheet" href="../consultas/consultas.css">
 </head>
 <body>
 <div class="container" data-module="consultas">
     <!-- Header -->
     <div class="header">
         <h1><i class='bx bx-clipboard'></i> Gestión de Consultas</h1>
-        <p>Gestiona las consultas médicas del sistema</p>
-        <div class="role-badge role-doctor">
-            <i class='bx bx-user-voice'></i>
-            Doctor
-        </div>
+        <p>Administra las consultas médicas del sistema</p>
     </div>
 
     <!-- Controles -->
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="buscarConsulta" placeholder="Buscar por paciente, doctor o diagnóstico...">
+            <input type="text" id="busquedaConsulta" placeholder="Buscar por usuario, diagnóstico, medicación...">
             <i class='bx bx-search'></i>
         </div>
-
-        <button class="btn-primary">
-            <i class='bx bx-plus'></i> Nueva Consulta
+        <button class="btn-primary" id="btnNuevaConsulta">
+            <i class='bx bx-plus'></i> Registrar Consulta
         </button>
     </div>
 
@@ -35,34 +30,43 @@
     <div class="stats">
         <div class="stat-card">
             <i class='bx bx-clipboard'></i>
-            <h3>0</h3>
+            <h3 id="statTotalConsultas">0</h3>
             <p>Total Consultas</p>
         </div>
         <div class="stat-card">
             <i class='bx bx-check-circle'></i>
-            <h3>0</h3>
+            <h3 id="statCompletadas">0</h3>
             <p>Completadas</p>
         </div>
         <div class="stat-card">
             <i class='bx bx-time'></i>
-            <h3>0</h3>
+            <h3 id="statPendientes">0</h3>
             <p>Pendientes</p>
         </div>
     </div>
 
     <!-- Lista de Consultas -->
-    <div class="consultas-table">
-        <div class="table-header">
-            <h2>Consultas Registradas</h2>
-        </div>
-
-        <div class="table-container">
-            <div class="no-consultas">
-                <i class='bx bx-folder-open'></i>
-                <h3>No hay consultas registradas</h3>
-                <p>Haz clic en "Nueva Consulta" para agregar la primera</p>
+    <div class="doctors-grid" id="consultasGrid">
+        <!-- Aquí se mostrarán las tarjetas de consultas, usando la clase doctor-card para cada consulta -->
+        <!-- Ejemplo de tarjeta:
+        <div class="doctor-card">
+            <div class="doctor-header">
+                <div class="doctor-avatar">C</div>
+                <div class="doctor-info">
+                    <h3>Usuario Ejemplo</h3>
+                    <span class="doctor-specialty">Diagnóstico: Gripe</span>
+                </div>
+            </div>
+            <div class="doctor-details">
+                <div class="doctor-detail"><i class='bx bx-capsule'></i> Medicación: Paracetamol</div>
+                <div class="doctor-detail"><i class='bx bx-comment'></i> Observaciones: Reposo 3 días</div>
+            </div>
+            <div class="doctor-actions">
+                <button class="btn-edit"><i class='bx bx-edit'></i> Editar</button>
+                <button class="btn-delete"><i class='bx bx-trash'></i> Eliminar</button>
             </div>
         </div>
+        -->
     </div>
 </div>
 
@@ -109,19 +113,23 @@
 <div id="modalEditar" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3><i class='bx bx-edit'></i> Editar Consulta</h3>
-            <span class="close">&times;</span>
+            <h2 id="modalTituloConsulta">Editar Consulta</h2>
+            <span class="close" id="cerrarModalConsulta">&times;</span>
         </div>
         <div class="modal-body">
             <form id="formEditarConsulta">
                 <input type="hidden" id="edit_id" name="id">
                 <div class="form-group">
+                    <label for="edit_usuario">Usuario:</label>
+                    <input type="text" id="edit_usuario" name="usuario" placeholder="Buscar usuario..." required autocomplete="off">
+                </div>
+                <div class="form-group">
                     <label for="edit_diagnostico">Diagnóstico:</label>
                     <textarea id="edit_diagnostico" name="diagnostico" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="edit_receta">Receta:</label>
-                    <textarea id="edit_receta" name="receta"></textarea>
+                    <label for="edit_medicacion">Medicación:</label>
+                    <textarea id="edit_medicacion" name="medicacion" required></textarea>
                 </div>
                 <div class="form-group">
                     <label for="edit_observaciones">Observaciones:</label>

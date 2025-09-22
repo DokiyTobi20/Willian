@@ -50,6 +50,35 @@
             <div class="no-citas">
                 <i class='bx bx-calendar-x'></i>
                 <h3>No hay citas programadas para este día</h3>
+<!-- Modal Lista de Espera -->
+<div id="modalListaEspera" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class='bx bx-time-five'></i> Registro en Lista de Espera</h3>
+            <span class="close" id="closeListaEspera">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="formListaEspera">
+                <div class="form-group">
+                    <label for="usuario_espera">Usuario:</label>
+                    <input type="text" id="usuario_espera" name="usuario" required placeholder="Ingrese su nombre">
+                </div>
+                <div class="form-group">
+                    <label for="hora_registro">Hora de registro:</label>
+                    <input type="time" id="hora_registro" name="hora_registro" required>
+                </div>
+                <div class="form-group">
+                    <label for="hora_disponible">Hora disponible:</label>
+                    <input type="time" id="hora_disponible" name="hora_disponible" readonly>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelarListaEspera">Cancelar</button>
+                    <button type="submit" class="btn-primary"><i class='bx bx-check'></i> Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
                 <p>Haz clic en "Agendar Cita" para programar la primera cita</p>
             </div>
             <!-- Si lo prefieres, puedes poner una tabla estática de ejemplo
@@ -120,3 +149,4 @@
 
 </body>
 </html>
+<script src="citas.js"></script>
