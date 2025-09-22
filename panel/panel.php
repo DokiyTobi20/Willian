@@ -11,6 +11,7 @@ require_once __DIR__ . '/operaciones_panel.php';
     <title><?= $titulo_panel ?></title>
     <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="../estilos.css">
+    <link rel="stylesheet" href="panel.css">
     <script src="panel.js" defer></script>
 </head>
 <body>

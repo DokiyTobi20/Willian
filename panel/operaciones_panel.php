@@ -18,6 +18,17 @@ require_once __DIR__ . '/../utiles/verificar_acceso.php';
 const CONFIGURACION_PANEL = [
     'titulo' => 'Panel General',
     'secciones' => [
+        'inicio' => [
+            'titulo' => 'Inicio',
+            'opciones' => [
+                'inicio' => [
+                    'vista' => 'inicio/inicio',
+                    'icono' => 'bx-home-circle',
+                    'texto' => 'Inicio',
+                    'descripcion' => 'Panel principal de inicio'
+                ]
+            ]
+        ],
         'personal' => [
             'titulo' => 'Gestión de Personal',
             'opciones' => [
