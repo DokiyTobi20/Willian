@@ -1,3 +1,7 @@
+// Encapsulado para evitar conflictos globales
+(function() {
+    // ...existing code...
+})();
 'use strict';
 
 const AppCore = {
@@ -49,9 +53,6 @@ window.AppCore = AppCore;
             this.initializeMenuCollapse();
             this.initializeViewLoading();
             this.checkReloadParams();
-            if (!this.currentView && !window.location.search.includes('reload=true')) {
-                this.loadView('inicio/inicio', 'inicio/inicio.js');
-            }
         },
         
         initializeElements() {
@@ -165,8 +166,12 @@ window.AppCore = AppCore;
         },
         
         getViewPath(nombreVista) {
-            // Como las vistas están en carpetas en la raíz, salimos de /panel/
-            return `../${nombreVista}.php`;
+            // Si el nombre ya incluye una barra, usarlo tal cual
+            if (nombreVista.includes('/')) {
+                return `../${nombreVista}.php`;
+            }
+            // Si no, buscar en la subcarpeta
+            return `../${nombreVista}/${nombreVista}.php`;
         },
         
         updateActiveMenu(nombreVista) {
@@ -219,6 +224,13 @@ window.AppCore = AppCore;
     
     document.addEventListener('DOMContentLoaded', () => {
         PanelModule.init();
+        // Mostrar bienvenida si no hay vista seleccionada
+        setTimeout(() => {
+            const contenedor = document.getElementById('contenidoDinamico');
+            if (contenedor && !contenedor.innerHTML.trim()) {
+                window.panelUtils.loadView('inicio', null);
+            }
+        }, 100);
     });
     
     window.panelUtils = {

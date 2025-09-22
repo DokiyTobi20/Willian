@@ -1,3 +1,7 @@
+// Encapsulado para evitar conflictos globales
+(function() {
+    // ...existing code...
+})();
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('container');
     const btnSignUp = document.getElementById('btn-sign-up');

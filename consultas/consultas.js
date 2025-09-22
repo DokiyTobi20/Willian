@@ -1,3 +1,7 @@
+// Encapsulado para evitar conflictos globales
+(function() {
+	// ...existing code...
+})();
 // Autocompletado de usuario en el modal de consulta
 function autocompletarUsuario() {
 	const inputUsuario = document.getElementById('edit_usuario');
