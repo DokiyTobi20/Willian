@@ -143,222 +143,81 @@ try {
                 <div class="form-section">
                     <h3>Horarios de Trabajo</h3>
                     <div class="schedule-container">
-                        <!-- 7 días sin generación dinámica -->
+                        <!-- 7 días, cada uno con dos campos de hora tipo time -->
+                        <?php 
+                        $dias = [
+                            1 => 'Lunes',
+                            2 => 'Martes',
+                            3 => 'Miércoles',
+                            4 => 'Jueves',
+                            5 => 'Viernes',
+                            6 => 'Sábado',
+                            7 => 'Domingo'
+                        ];
+                        foreach ($dias as $num => $nombre): ?>
                         <div class="schedule-day">
                             <div class="day-header">
-                                <input type="checkbox" id="dia1" name="dias[]" value="1">
-                                <label for="dia1">Lunes</label>
+                                <input type="checkbox" id="dia<?= $num ?>" name="dias[]" value="<?= $num ?>">
+                                <label for="dia<?= $num ?>"><?= $nombre ?></label>
                             </div>
                             <div class="time-inputs">
                                 <div class="time-group">
-                                    <label>AM</label>
-                                    <select name="hora_inicio_am[1]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_am[1]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
+                                    <label>Hora inicio</label>
+                                    <input type="time" name="hora_inicio[<?= $num ?>]" disabled>
                                 </div>
                                 <div class="time-group">
-                                    <label>PM</label>
-                                    <select name="hora_inicio_pm[1]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_pm[1]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
+                                    <label>Hora fin</label>
+                                    <input type="time" name="hora_fin[<?= $num ?>]" disabled>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="schedule-day">
-                            <div class="day-header">
-                                <input type="checkbox" id="dia2" name="dias[]" value="2">
-                                <label for="dia2">Martes</label>
-                            </div>
-                            <div class="time-inputs">
-                                <div class="time-group">
-                                    <label>AM</label>
-                                    <select name="hora_inicio_am[2]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_am[2]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                                <div class="time-group">
-                                    <label>PM</label>
-                                    <select name="hora_inicio_pm[2]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_pm[2]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="schedule-day">
-                            <div class="day-header">
-                                <input type="checkbox" id="dia3" name="dias[]" value="3">
-                                <label for="dia3">Miércoles</label>
-                            </div>
-                            <div class="time-inputs">
-                                <div class="time-group">
-                                    <label>AM</label>
-                                    <select name="hora_inicio_am[3]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_am[3]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                                <div class="time-group">
-                                    <label>PM</label>
-                                    <select name="hora_inicio_pm[3]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_pm[3]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="schedule-day">
-                            <div class="day-header">
-                                <input type="checkbox" id="dia4" name="dias[]" value="4">
-                                <label for="dia4">Jueves</label>
-                            </div>
-                            <div class="time-inputs">
-                                <div class="time-group">
-                                    <label>AM</label>
-                                    <select name="hora_inicio_am[4]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_am[4]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                                <div class="time-group">
-                                    <label>PM</label>
-                                    <select name="hora_inicio_pm[4]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_pm[4]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="schedule-day">
-                            <div class="day-header">
-                                <input type="checkbox" id="dia5" name="dias[]" value="5">
-                                <label for="dia5">Viernes</label>
-                            </div>
-                            <div class="time-inputs">
-                                <div class="time-group">
-                                    <label>AM</label>
-                                    <select name="hora_inicio_am[5]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_am[5]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                                <div class="time-group">
-                                    <label>PM</label>
-                                    <select name="hora_inicio_pm[5]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_pm[5]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="schedule-day">
-                            <div class="day-header">
-                                <input type="checkbox" id="dia6" name="dias[]" value="6">
-                                <label for="dia6">Sábado</label>
-                            </div>
-                            <div class="time-inputs">
-                                <div class="time-group">
-                                    <label>AM</label>
-                                    <select name="hora_inicio_am[6]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_am[6]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                                <div class="time-group">
-                                    <label>PM</label>
-                                    <select name="hora_inicio_pm[6]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_pm[6]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="schedule-day">
-                            <div class="day-header">
-                                <input type="checkbox" id="dia7" name="dias[]" value="7">
-                                <label for="dia7">Domingo</label>
-                            </div>
-                            <div class="time-inputs">
-                                <div class="time-group">
-                                    <label>AM</label>
-                                    <select name="hora_inicio_am[7]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_am[7]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                                <div class="time-group">
-                                    <label>PM</label>
-                                    <select name="hora_inicio_pm[7]" disabled>
-                                        <option value="">Inicio</option>
-                                    </select>
-                                    <select name="hora_fin_pm[7]" disabled>
-                                        <option value="">Fin</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
+                        <?php endforeach; ?>
                     </div>
                 </div>
 
-                <div class="modal-actions">
+                <div class="modal-actions" style="display: flex; flex-direction: row; justify-content: center; gap: 20px;">
                     <button type="button" class="btn-secondary" id="btnCancelar">Cancelar</button>
                     <button type="submit" class="btn-primary" id="btnGuardar">Crear Doctor</button>
+                </div>
+                <style>
+                .modal-actions {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    justify-content: flex-end !important;
+                    gap: 20px !important;
+                }
+                .modal-actions button:first-child {
+                    order: 1;
+                }
+                .modal-actions button:last-child {
+                    order: 2;
+                }
+                </style>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal de Horarios -->
-<div id="modalHorarios" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="tituloHorarios">Horarios del Doctor</h2>
-            <span class="close" id="cerrarModalHorarios">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div id="contenidoHorarios">
-            </div>
-        </div>
-    </div>
-</div>
 
 </body>
 <script src="doctores.js"></script>
+<script>
+// Evitar scroll del body cuando el modal está abierto
+function toggleBodyScroll(disable) {
+    document.body.style.overflow = disable ? 'hidden' : 'auto';
+}
+// Detectar apertura/cierre del modal
+const modalDoctor = document.getElementById('modalDoctor');
+if (modalDoctor) {
+    const observer = new MutationObserver(() => {
+        if (modalDoctor.style.display === 'block') {
+            toggleBodyScroll(true);
+        } else {
+            toggleBodyScroll(false);
+        }
+    });
+    observer.observe(modalDoctor, { attributes: true, attributeFilter: ['style'] });
+}
+</script>
 </html>

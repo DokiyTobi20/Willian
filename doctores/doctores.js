@@ -40,6 +40,23 @@
             btnCancelar.addEventListener('click', cerrarModal);
         }
 
+        // Habilitar/deshabilitar los campos de hora según el checkbox de cada día
+        document.querySelectorAll('.schedule-day').forEach(day => {
+            const checkbox = day.querySelector('input[type="checkbox"]');
+            const horaInicio = day.querySelector('input[name^="hora_inicio"]');
+            const horaFin = day.querySelector('input[name^="hora_fin"]');
+            if (checkbox && horaInicio && horaFin) {
+                checkbox.addEventListener('change', function() {
+                    horaInicio.disabled = !checkbox.checked;
+                    horaFin.disabled = !checkbox.checked;
+                    if (!checkbox.checked) {
+                        horaInicio.value = '';
+                        horaFin.value = '';
+                    }
+                });
+            }
+        });
+
         const form = document.getElementById('formDoctor');
         if (form) {
             form.addEventListener('submit', async function(e) {

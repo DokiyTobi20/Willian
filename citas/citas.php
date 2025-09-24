@@ -27,8 +27,8 @@
             <input type="date" id="fecha">
         </div>
 
-        <button class="btn-primary" id="btnAbrirAgendar">
-            <i class='bx bx-plus'></i> Agendar Cita
+        <button class="btn-primary" id="btnListaEspera">
+            <i class='bx bx-time-five'></i> Registrarme en lista de espera
         </button>
     </div>
 
@@ -41,112 +41,74 @@
     </div>
 
     <!-- Tabla de Citas -->
+    <?php
+    require_once __DIR__ . '/../BDD/conexion.php';
+    $pdo = Conexion::conectar();
+
+    // Fecha de hoy (YYYY-MM-DD)
+    $hoy = date('Y-m-d');
+
+    // Buscamos la lista de espera creada hoy (si existe)
+    $stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE DATE(fecha_creacion) = ? LIMIT 1');
+    $stmt->execute([$hoy]);
+    $lista = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $inscripciones = [];
+    if ($lista) {
+        $id_lista = $lista['id'];
+
+        // SELECT con alias claro
+        $stmt = $pdo->prepare('
+            SELECT 
+                le.numero AS turno,
+                u.cedula AS cedula,
+                CONCAT(u.nombre, " ", u.apellido) AS nombre_completo
+            FROM lista_espera_inscripciones le
+            JOIN usuarios u ON le.id_usuario = u.id
+            WHERE le.id_lista = ?
+            ORDER BY le.numero ASC
+        ');
+        $stmt->execute([$id_lista]);
+        $inscripciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    ?>
     <div class="citas-table">
         <div class="table-header">
-            <h2>Citas del día</h2>
+            <h2>Lista de espera</h2>
         </div>
-
         <div class="table-container">
-            <div class="no-citas">
-                <i class='bx bx-calendar-x'></i>
-                <h3>No hay citas programadas para este día</h3>
-<!-- Modal Lista de Espera -->
-<div id="modalListaEspera" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class='bx bx-time-five'></i> Registro en Lista de Espera</h3>
-            <span class="close" id="closeListaEspera">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="formListaEspera">
-                <div class="form-group">
-                    <label for="usuario_espera">Usuario:</label>
-                    <input type="text" id="usuario_espera" name="usuario" required placeholder="Ingrese su nombre">
-                </div>
-                <div class="form-group">
-                    <label for="hora_registro">Hora de registro:</label>
-                    <input type="time" id="hora_registro" name="hora_registro" required>
-                </div>
-                <div class="form-group">
-                    <label for="hora_disponible">Hora disponible:</label>
-                    <input type="time" id="hora_disponible" name="hora_disponible" readonly>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="cancelarListaEspera">Cancelar</button>
-                    <button type="submit" class="btn-primary"><i class='bx bx-check'></i> Registrar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-                <p>Haz clic en "Agendar Cita" para programar la primera cita</p>
-            </div>
-            <!-- Si lo prefieres, puedes poner una tabla estática de ejemplo
-            <table>
+            <table id="tablaListaEspera">
                 <thead>
                     <tr>
+                        <th>Turno</th>
                         <th>Hora</th>
-                        <th>Paciente</th>
-                        <th>Doctor</th>
-                        <th>Especialidad</th>
-                        <th>Estado</th>
+                        <th>Nombre y apellido</th>
+                        <th>Cédula</th>
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                <?php if (count($inscripciones) > 0): ?>
+                    <?php foreach ($inscripciones as $item): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($item['turno']) ?></td>
+                            <td>
+                                <?= is_numeric($item['turno'])
+                                    ? htmlspecialchars(sprintf('%02d:00', 7 + (int)$item['turno']))
+                                    : '' ?>
+                            </td>
+                            <td><?= htmlspecialchars($item['nombre_completo']) ?></td>
+                            <td><?= htmlspecialchars($item['cedula']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr><td colspan="4">No hay inscripciones en la lista de espera hoy.</td></tr>
+                <?php endif; ?>
+                </tbody>
             </table>
-            -->
         </div>
     </div>
 </div>
 
-<!-- Modal Agendar Cita -->
-<div id="modalAgendar" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class='bx bx-calendar-plus'></i> Agendar Nueva Cita</h3>
-            <span class="close">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="formAgendarCita">
-                <div class="form-group">
-                    <label for="paciente">Paciente:</label>
-                    <select id="paciente" name="id_paciente" required>
-                        <option value="">Seleccione un paciente...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="especialidad">Especialidad:</label>
-                    <select id="especialidad" name="id_especialidad" required>
-                        <option value="">Seleccione una especialidad...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="doctor">Doctor:</label>
-                    <select id="doctor" name="id_doctor" required disabled>
-                        <option value="">Primero seleccione una especialidad...</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="fecha_cita">Fecha:</label>
-                        <input type="date" id="fecha_cita" name="fecha" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="hora_cita">Hora:</label>
-                        <select id="hora_cita" name="hora" required>
-                            <option value="">Seleccione hora...</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn-primary"><i class='bx bx-check'></i> Agendar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
+<script src="citas.js"></script>
 </body>
 </html>
-<script src="citas.js"></script>

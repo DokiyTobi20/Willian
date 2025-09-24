@@ -55,6 +55,7 @@ if (isset($_POST['login'])) {
             $_SESSION['rol']      = $user['id_rol'];
             $_SESSION['nombre']   = $user['nombre'];
             $_SESSION['apellido'] = $user['apellido'];
+            $_SESSION['cedula']   = $user['cedula'];
 
             // Devolver JSON para que JS redirija
             header('Content-Type: application/json');
@@ -167,6 +168,7 @@ if (isset($_POST['register'])) {
                 $_SESSION['rol']      = $newUser['id_rol'];
                 $_SESSION['nombre']   = $newUser['nombre'];
                 $_SESSION['apellido'] = $newUser['apellido'];
+                $_SESSION['cedula']   = $newUser['cedula'];
 
                 // Devolver JSON para que JS redirija
                 header('Content-Type: application/json');

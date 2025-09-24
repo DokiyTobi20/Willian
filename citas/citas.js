@@ -7,6 +7,33 @@
 	function boot() {
 		inicializarModales();
 		inicializarEventos();
+		mostrarListaEspera();
+	}
+	// Mostrar la lista de espera en la tabla
+	async function mostrarListaEspera() {
+		const tabla = document.getElementById('tablaListaEspera');
+		if (!tabla) return;
+		const tbody = tabla.querySelector('tbody');
+		tbody.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
+		try {
+			// Obtener inscripciones de la lista de espera de hoy
+			const resp = await fetch('../citas/operaciones_citas.php?accion=inscripciones_lista_espera');
+			if (resp.ok) {
+				const inscripciones = await resp.json();
+				if (Array.isArray(inscripciones) && inscripciones.length > 0) {
+					tbody.innerHTML = '';
+					inscripciones.forEach(item => {
+						tbody.innerHTML += `<tr><td>${item.numero}</td><td>${item.hora}</td><td>${item.paciente}</td></tr>`;
+					});
+				} else {
+					tbody.innerHTML = '<tr><td colspan="3">No hay inscripciones en la lista de espera hoy.</td></tr>';
+				}
+			} else {
+				tbody.innerHTML = '<tr><td colspan="3">Error al cargar la lista de espera.</td></tr>';
+			}
+		} catch {
+			tbody.innerHTML = '<tr><td colspan="3">Error al cargar la lista de espera.</td></tr>';
+		}
 	}
 
 	function inicializarModales() {
@@ -31,15 +58,79 @@
 			btnAbrirAgendar.addEventListener('click', abrirModalAgendarCita);
 		}
 
-		let btnAbrirListaEspera = document.getElementById('btnAbrirListaEspera');
-		if (!btnAbrirListaEspera) {
-			btnAbrirListaEspera = document.createElement('button');
-			btnAbrirListaEspera.className = 'btn-primary';
-			btnAbrirListaEspera.innerHTML = "<i class='bx bx-time-five'></i> Registrarme en lista de espera";
-			btnAbrirListaEspera.id = 'btnAbrirListaEspera';
-			document.querySelector('.controls').appendChild(btnAbrirListaEspera);
+		const btnListaEspera = document.getElementById('btnListaEspera');
+		if (btnListaEspera) {
+			btnListaEspera.addEventListener('click', async function() {
+				// Obtener datos de usuario de la sesión activa
+				let usuario = null;
+				try {
+					const resp = await fetch('../citas/operaciones_citas.php?accion=usuario_sesion');
+					if (resp.ok) {
+						usuario = await resp.json();
+					}
+				} catch (e) {
+					console.error('Error al obtener datos de sesión:', e);
+				}
+				console.log('Datos de usuario de sesión:', usuario);
+				if (!usuario || !usuario.nombre || !usuario.apellido || !usuario.cedula) {
+					alert('No se pudo obtener los datos de la sesión.');
+					return;
+				}
+				// Obtener la siguiente hora disponible desde las 8am en saltos de 1 hora
+				let horaDisponible = await obtenerSiguienteHoraDisponible();
+				if (!horaDisponible) {
+					alert('No hay más turnos disponibles hoy.');
+					return;
+				}
+				fetch('../citas/operaciones_citas.php', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						accion: 'registrar_lista_espera',
+						nombre: usuario.nombre,
+						apellido: usuario.apellido,
+						cedula: usuario.cedula,
+						hora_registro: horaDisponible,
+						hora_disponible: horaDisponible
+					})
+				})
+				.then(res => res.json())
+				.then(data => {
+					alert(data.mensaje || 'Registrado en lista de espera para las ' + horaDisponible);
+					mostrarListaEspera();
+				})
+				.catch(() => {
+					alert('Error al registrar en lista de espera');
+				});
+			});
 		}
-		btnAbrirListaEspera.addEventListener('click', abrirModalListaEspera);
+
+		// Función para obtener la siguiente hora disponible desde las 8am en saltos de 1 hora
+		async function obtenerSiguienteHoraDisponible() {
+			// Aquí deberías consultar al backend las horas ya ocupadas, pero para ejemplo local:
+			// Simula obtener la lista de horas ocupadas (debería venir de la BD)
+			let horasOcupadas = [];
+			try {
+				const resp = await fetch('../citas/operaciones_citas.php?accion=horas_lista_espera');
+				if (resp.ok) {
+					const data = await resp.json();
+					// Si el backend devuelve un objeto, conviértelo en array
+					if (Array.isArray(data)) {
+						horasOcupadas = data;
+					} else if (data && typeof data === 'object') {
+						horasOcupadas = Object.values(data);
+					}
+				}
+			} catch {}
+			// Generar horas desde 08:00 hasta 18:00 (10 turnos)
+			for (let h = 8; h <= 18; h++) {
+				let hora = (h < 10 ? '0' : '') + h + ':00';
+				if (!horasOcupadas.includes(hora)) {
+					return hora;
+				}
+			}
+			return null;
+		}
 
 		document.querySelectorAll('.btn-secondary').forEach(btn => {
 			btn.addEventListener('click', cerrarModal);
@@ -67,7 +158,7 @@
 				const usuario = document.getElementById('usuario_espera').value;
 				const hora_registro = document.getElementById('hora_registro').value;
 				const hora_disponible = document.getElementById('hora_disponible').value;
-				fetch('operaciones_citas.php', {
+				fetch('../citas/operaciones_citas.php', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
@@ -103,16 +194,7 @@
 	}
 
 	function abrirModalListaEspera() {
-		if (!modalListaEspera) {
-			modalListaEspera = document.getElementById('modalListaEspera');
-		}
-		if (!modalListaEspera) return;
-		modalListaEspera.style.display = 'block';
-		document.body.style.overflow = 'hidden';
-		setTimeout(() => {
-			const input = modalListaEspera.querySelector('input');
-			if (input) input.focus();
-		}, 100);
+		// Eliminado: ya no se usa modal para lista de espera
 	}
 
 	function cerrarModal() {

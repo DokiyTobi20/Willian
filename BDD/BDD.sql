@@ -95,9 +95,7 @@ CREATE TABLE horarios_doctor (
 -- TABLA DE LISTAS DE ESPERA
 CREATE TABLE listas_espera (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    fecha DATE NOT NULL UNIQUE,
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_fecha (fecha)
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- TABLA DE INSCRIPCIONES EN LISTA DE ESPERA
@@ -105,17 +103,14 @@ CREATE TABLE lista_espera_inscripciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_lista INT NOT NULL,
     id_usuario INT NOT NULL,
-    id_doctor INT NOT NULL,
     numero INT NOT NULL,
     estado ENUM('Pendiente','Atendido','No asistió') DEFAULT 'Pendiente',
     fecha_inscripcion DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY u_lista_usuario (id_lista, id_usuario),
     FOREIGN KEY (id_lista) REFERENCES listas_espera(id) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_doctor) REFERENCES doctores(id) ON DELETE CASCADE,
     INDEX idx_lista (id_lista),
     INDEX idx_usuario (id_usuario),
-    INDEX idx_doctor (id_doctor),
     INDEX idx_estado (estado),
     INDEX idx_fecha_inscripcion (fecha_inscripcion)
 );
