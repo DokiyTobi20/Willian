@@ -1,19 +1,93 @@
+.menu-dashboard.collapsed .top-menu {
+	display: none !important;
+}
+/* Forzar ocultar cualquier texto de sección en el menú lateral colapsado */
+.menu-dashboard.collapsed .section-title,
+.menu-dashboard.collapsed .menu-section > span,
+.menu-dashboard.collapsed .menu-section > .section-title,
+.menu-dashboard.collapsed .menu-section span,
+.menu-dashboard.collapsed .menu-section [class*="title"],
+.menu-dashboard.collapsed .menu-section [class*="titulo"] {
+	display: none !important;
+	width: 0 !important;
+	height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	opacity: 0 !important;
+	overflow: hidden !important;
+	pointer-events: none !important;
+}
 /* Panel y dashboard styles movidos desde estilos.css */
 .menu-dashboard {
-	width: 320px; /* Reducido de 350px a 320px */
-	min-height: 100vh;
-	background: var(--primary-color);
-	box-shadow: 2px 0 8px rgba(0,0,0,0.05);
-	display: flex;
-	flex-direction: column;
-	position: fixed;
-	left: 0;
-	top: 0;
-	transition: width 0.3s;
-	overflow: hidden; /* Prevent text wrapping and reflowing */
+		width: 320px;
+		height: 100dvh;
+		min-height: 0 !important;
+		max-height: 100dvh !important;
+		background: var(--primary-color);
+		box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+		position: fixed;
+		left: 0;
+		top: 0;
+		transition: width 0.3s;
+		overflow-y: auto;
+		z-index: 9999;
+		display: flex;
+		flex-direction: column;
+
+		/* Scrollbar bonito para navegadores modernos */
+		scrollbar-width: thin;
+		scrollbar-color: #174c43 var(--primary-color);
+	}
+
+	.menu-dashboard::-webkit-scrollbar {
+		width: 10px;
+		background: var(--primary-color);
+	}
+	.menu-dashboard::-webkit-scrollbar-thumb {
+		background: #174c43;
+		border-radius: 6px;
+	}
+	.menu-dashboard::-webkit-scrollbar-thumb:hover {
+		background: #0e2a23;
+	}
 }
 .menu-dashboard.collapsed {
-	width: 80px; /* Reducido de 90px a 80px */
+		width: 80px;
+		max-height: 100vh !important;
+		overflow-x: hidden !important;
+		overflow-y: auto !important;
+	}
+
+	.menu-dashboard.collapsed .menu,
+	.menu-dashboard.collapsed .menu,
+	.menu-dashboard.collapsed .menu-section {
+		overflow: unset !important;
+	}
+}
+.menu {
+		display: flex;
+		flex-direction: column;
+		margin-top: 1rem;
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+
+		/* Scrollbar bonito para navegadores modernos */
+		scrollbar-width: thin;
+		scrollbar-color: #28bf96 #174c43;
+	}
+
+	.menu::-webkit-scrollbar {
+		width: 8px;
+		background: #174c43;
+	}
+	.menu::-webkit-scrollbar-thumb {
+		background: linear-gradient(135deg, #28bf96 0%, #209677 100%);
+		border-radius: 6px;
+	}
+	.menu::-webkit-scrollbar-thumb:hover {
+		background: #209677;
+	}
 }
 .top-menu {
 	display: flex;
@@ -37,8 +111,11 @@
 	transition: opacity 0.3s;
 }
 .menu-dashboard.collapsed .logo span {
-	opacity: 0;
-	pointer-events: none; /* Evitar interacciones fantasma */
+			display: none !important;
+			width: 0 !important;
+			overflow: hidden !important;
+			opacity: 0 !important;
+			pointer-events: none !important;
 }
 .enlace {
 	display: flex;
@@ -102,28 +179,19 @@
 	width: 100%;
 	font-size: 1rem;
 }
-.menu {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-	margin-top: 1rem;
-}
+/* Unificado con estilos.css: solo margin-left para separación del menú lateral */
 .panel-content {
-	position: fixed;
-	top: 0;
-	left: 320px;
-	right: 0;
-	bottom: 0;
-	overflow-y: auto; /* Permitir scroll si el contenido es largo */
+	margin-left: 320px;
 	padding: 2rem;
-	transition: left 0.3s;
+	transition: margin-left 0.3s;
+	overflow-y: auto; /* Permitir scroll si el contenido es largo */
 	overflow-x: hidden; /* Prevent horizontal scroll while preserving vertical scroll */
 }
 .panel-content > * {
 	min-width: 500px; /* Evita que el contenido se comprima */
 }
 .menu-dashboard.collapsed ~ .panel-content {
-	left: 80px;
+	margin-left: 80px;
 }
 .bienvenida {
 	font-size: 1.8rem; /* Reducido de 2rem a 1.8rem */
@@ -133,15 +201,31 @@
 @media (max-width: 700px) {
 	.menu-dashboard {
 		width: 100vw;
-		min-height: auto;
-		position: static;
+		height: 100dvh;
+		min-height: 0 !important;
+		max-height: 100dvh !important;
+		position: fixed;
+		left: 0;
+		top: 0;
+		overflow-y: auto;
+		z-index: 9999;
+		display: flex;
+		flex-direction: column;
+	}
+	.menu {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
 	}
 	.panel-content {
-		position: static;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		padding: 2rem;
+		margin-left: 0;
+		padding: 1rem;
+	}
+	.panel-content > * {
+		min-width: unset;
+	}
+	body {
+		overflow-y: auto !important;
 	}
 }
 .menu-section {
@@ -154,22 +238,33 @@
 	margin-bottom: 0;
 }
 .section-title {
-	color: rgba(255, 255, 255, 0.8);
-	font-size: 0.9rem; /* Reducido de 1rem a 0.9rem */
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin-bottom: 0.75rem;
-	padding: 0 1.5rem;
-	transition: opacity 0.3s;
+		color: rgba(255, 255, 255, 0.8);
+		font-size: 0.9rem; /* Reducido de 1rem a 0.9rem */
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		margin-bottom: 0.75rem;
+		padding: 0 1.5rem;
+		transition: opacity 0.3s, max-width 0.3s;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 }
 .menu-dashboard.collapsed .section-title {
-	opacity: 0;
-	height: 0;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-	display: none;
+		opacity: 0;
+		height: 0;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+		display: none;
+	}
+
+	.menu-dashboard.collapsed .section-title span {
+		display: none !important;
+		width: 0 !important;
+		overflow: hidden !important;
+		opacity: 0 !important;
+		pointer-events: none !important;
 }
 .menu-section .enlace {
 	margin-bottom: 0.25rem;
