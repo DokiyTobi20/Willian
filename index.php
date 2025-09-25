@@ -23,7 +23,7 @@ if (isset($_SESSION['usuario'])) {
     <link rel="stylesheet" href="estilos.css" />
     <title>Sistema Médico</title>
   </head>
-  <body>
+  <body class="index-page">
     <div class="container">
       <nav>
         <div class="nav__logo">
