@@ -716,3 +716,10 @@ body {
         gap: 10px;
     }
 }
+
+.modal-actions {
+    display: flex;
+    gap: 10px; /* Espaciado entre los botones */
+    justify-content: flex-end; /* Alinear los botones a la derecha */
+    flex-wrap: wrap; /* Permitir que se ajusten en pantallas pequeñas */
+}

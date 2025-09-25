@@ -63,6 +63,32 @@
                 filtrarEspecialidades(searchInput.value.trim());
             }
         }
+
+        // Mostrar el modal al hacer clic en el botón "Nueva Especialidad"
+        const botonNuevaEspecialidad = document.getElementById('botonNuevaEspecialidad');
+        if (botonNuevaEspecialidad) {
+            botonNuevaEspecialidad.addEventListener('click', function() {
+                const modalCrear = document.getElementById('modalCrear');
+                if (modalCrear) {
+                    modalCrear.classList.add('show');
+                    modalCrear.style.display = 'flex'; // Asegurar que se muestre centrado
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        }
+
+        // Cerrar el modal al hacer clic en el botón de cerrar
+        const botonesCerrar = document.querySelectorAll('.close');
+        botonesCerrar.forEach(boton => {
+            boton.addEventListener('click', function() {
+                const modal = boton.closest('.modal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none'; // Ocultar el modal correctamente
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
     }
 
     function configurarValidaciones() {

@@ -48,7 +48,7 @@ try {
 <div class="container" data-module="especialidades">
     <!-- Header -->
     <div class="header">
-        <h1>Gestión de Especialidades Médicas</h1>
+        <h1><i class='bx bx-plus-medical'></i> Gestión de Especialidades Médicas</h1>
         <p>Administra las especialidades médicas registradas en el sistema</p>
     </div>
 

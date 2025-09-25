@@ -25,17 +25,32 @@ body {
     border-radius: 15px;
     margin-bottom: 30px;
     text-align: center;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .header h1 {
     font-size: 2.5em;
     margin-bottom: 10px;
     font-weight: 300;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espaciado entre el texto y el icono */
+}
+
+.header h1 i {
+    font-size: 1.2em; /* Tamaño del icono */
 }
 
 .header p {
     font-size: 1.1em;
     opacity: 0.9;
+    margin: 0;
+    line-height: 1.4;
 }
 
 .controls {
@@ -251,7 +266,7 @@ body {
 
 /* Modal styles */
 .modal {
-    display: none;
+    display: none; /* Ocultar por defecto */
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -262,6 +277,12 @@ body {
     backdrop-filter: blur(5px);
 }
 
+.modal.show {
+    display: flex; /* Mostrar y centrar con flexbox */
+    align-items: center; /* Centrado vertical */
+    justify-content: center; /* Centrado horizontal */
+}
+
 .modal-content {
     background-color: white;
     margin: 3% auto;
@@ -269,8 +290,9 @@ body {
     border-radius: 15px;
     width: 90%;
     max-width: 700px;
-    max-height: 90vh;
-    overflow-y: auto;
+    height: auto; /* Ajustar la altura al contenido */
+    max-height: 90vh; /* Mantener límite de altura para evitar desbordamiento */
+    overflow-y: auto; /* Habilitar scroll si el contenido excede el límite */
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease;
 }
@@ -407,6 +429,26 @@ body {
     padding: 40px 20px;
     color: #6c757d;
     font-style: italic;
+}
+
+/* Estilo para el input del modal de especialidades */
+.modal input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    background: white;
+    color: #333;
+    box-sizing: border-box;
+}
+
+.modal input[type="text"]:focus {
+    outline: none;
+    border-color: #28bf96;
+    box-shadow: 0 0 0 3px rgba(40, 191, 150, 0.1);
 }
 
 /* Responsive design */
