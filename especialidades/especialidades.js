@@ -195,33 +195,18 @@
                 if (accion === 'crear') {
                     const form = document.getElementById('formCrearEspecialidad');
                     if (form) form.reset();
-                    if (modalCrear) modalCrear.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                    const nuevoId = result.id || result.new_id || null;
-                    const nombre = formData.get('nombre');
-                    if (nuevoId && nombre) {
-                        agregarCardEspecialidad({ id: nuevoId, nombre });
-                        actualizarContador();
-                    } else {
-                        refrescarGridEspecialidades();
-                    }
+                    cerrarModal();
+                    // Siempre refrescar la vista completa para obtener datos actualizados del servidor
+                    refrescarGridEspecialidades();
+                    actualizarEstadisticas();
                 } else if (accion === 'actualizar') {
                     cerrarModal();
-                    const id = formData.get('id');
-                    const nombre = formData.get('nombre');
-                    if (id && nombre) {
-                        actualizarCardEspecialidad(id, nombre);
-                    } else {
-                        refrescarGridEspecialidades();
-                    }
+                    // Refrescar la vista completa para asegurar sincronización
+                    refrescarGridEspecialidades();
                 } else if (accion === 'eliminar') {
-                    const id = formData.get('id');
-                    if (id) {
-                        eliminarCardEspecialidad(id);
-                        actualizarContador();
-                    } else {
-                        refrescarGridEspecialidades();
-                    }
+                    // Refrescar la vista completa después de eliminar
+                    refrescarGridEspecialidades();
+                    actualizarEstadisticas();
                 }
             } else {
                 mostrarAlerta(msg, 'error');
@@ -243,20 +228,34 @@
         if (!grid) return;
         const card = document.createElement('div');
         card.className = 'especialidad-card';
+        const totalDoctores = parseInt(esp.total_doctores || esp.totalDoctores || 0);
+        const escNombre = escapeHtmlAttr(esp.nombre);
+        const escNombreHtml = escapeHtml(esp.nombre);
+        
+        let botonEliminar = '';
+        if (totalDoctores === 0) {
+            botonEliminar = `<button class="btn-delete" onclick="eliminarEspecialidad(${Number(esp.id)}, '${escNombre}')">
+                <i class='bx bx-trash'></i> Eliminar
+            </button>`;
+        } else {
+            botonEliminar = `<button class="btn-secondary" disabled title="No se puede eliminar: tiene doctores asignados">
+                <i class='bx bx-lock'></i> Protegida
+            </button>`;
+        }
+        
         card.innerHTML = `
             <div class="especialidad-info">
-                <h4>${escapeHtml(esp.nombre)}</h4>
+                <h4>${escNombreHtml}</h4>
             </div>
             <div class="especialidad-actions">
-                <button class="btn-edit" onclick="editarEspecialidad(${Number(esp.id)}, '${escapeHtmlAttr(esp.nombre)}')">
+                <button class="btn-edit" onclick="editarEspecialidad(${Number(esp.id)}, '${escNombre}')">
                     <i class='bx bx-edit'></i> Editar
                 </button>
-                <button class="btn-delete" onclick="eliminarEspecialidad(${Number(esp.id)}, '${escapeHtmlAttr(esp.nombre)}')">
-                    <i class='bx bx-trash'></i> Eliminar
-                </button>
+                ${botonEliminar}
             </div>
         `;
-        grid.prepend(card);
+        // Agregar al final del grid para mantener el orden alfabético del servidor
+        grid.appendChild(card);
     }
 
     function actualizarCardEspecialidad(id, nuevoNombre) {
@@ -293,15 +292,55 @@
     async function refrescarGridEspecialidades() {
         try {
             const resp = await fetch('../especialidades/operaciones_especialidades.php?accion=listar', { credentials: 'same-origin' });
-            if (!resp.ok) return;
+            if (!resp.ok) {
+                console.warn('Error al refrescar: respuesta no OK');
+                return;
+            }
             const lista = await resp.json();
             const grid = document.querySelector('.especialidades-grid');
-            if (!grid || !Array.isArray(lista)) return;
+            if (!grid) {
+                console.warn('No se encontró el grid de especialidades');
+                return;
+            }
+            if (!Array.isArray(lista)) {
+                console.warn('La respuesta no es un array válido');
+                return;
+            }
             grid.innerHTML = '';
-            lista.forEach(esp => agregarCardEspecialidad(esp));
+            if (lista.length === 0) {
+                // Si no hay especialidades después de refrescar, recargar página para mostrar mensaje vacío
+                window.location.reload();
+                return;
+            }
+            // Agregar todas las especialidades en el orden que vienen del servidor
+            lista.forEach(esp => {
+                agregarCardEspecialidad(esp);
+            });
             actualizarContador();
+            // Si hay un término de búsqueda activo, volver a aplicarlo
+            const searchInput = document.getElementById('nombreEspecialidad') || document.getElementById('busquedaEspecialidades');
+            if (searchInput && searchInput.value && searchInput.value.trim().length > 0) {
+                filtrarEspecialidades(searchInput.value.trim());
+            }
         } catch (e) {
-            console.warn('No se pudo refrescar el grid:', e);
+            console.error('Error al refrescar el grid:', e);
+            // Si falla, recargar la página para asegurar sincronización
+            window.location.reload();
+        }
+    }
+
+    function actualizarEstadisticas() {
+        // Actualizar contador de total de especialidades
+        const grid = document.querySelector('.especialidades-grid');
+        if (grid) {
+            const totalCards = grid.querySelectorAll('.especialidad-card').length;
+            const contador = document.querySelector('.contador');
+            if (contador) {
+                contador.textContent = `${totalCards} especialidad${totalCards !== 1 ? 'es' : ''} registrada${totalCards !== 1 ? 's' : ''}`;
+            }
+            // También actualizar las estadísticas en las cards superiores si es necesario
+            // Para una actualización completa de estadísticas, sería mejor recargar la página
+            // o hacer una petición adicional al servidor
         }
     }
 

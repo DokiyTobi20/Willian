@@ -79,14 +79,16 @@
         </div>
         <div class="modal-body">
             <form id="formCrearConsulta">
+                <input type="hidden" id="id_usuario_crear" name="id_usuario">
                 <div class="form-group">
-                    <label for="id_cita_crear">Cita:</label>
-                    <select id="id_cita_crear" name="id_cita" required>
-                        <option value="">Seleccione una cita...</option>
-                    </select>
+                    <label for="buscar_usuario_crear">Buscar Usuario (Paciente): *</label>
+                    <input type="text" id="buscar_usuario_crear" name="buscar_usuario" 
+                           placeholder="Escriba el nombre o cédula del usuario..." 
+                           required autocomplete="off">
+                    <div id="dropdown_usuarios_crear" class="autocomplete-dropdown" style="display: none;"></div>
                 </div>
                 <div class="form-group">
-                    <label for="diagnostico_crear">Diagnóstico:</label>
+                    <label for="diagnostico_crear">Diagnóstico: *</label>
                     <textarea id="diagnostico_crear" name="diagnostico" required 
                               placeholder="Escriba el diagnóstico de la consulta..."></textarea>
                 </div>
@@ -119,9 +121,13 @@
         <div class="modal-body">
             <form id="formEditarConsulta">
                 <input type="hidden" id="edit_id" name="id">
+                <input type="hidden" id="id_usuario_editar" name="id_usuario">
                 <div class="form-group">
-                    <label for="edit_usuario">Usuario:</label>
-                    <input type="text" id="edit_usuario" name="usuario" placeholder="Buscar usuario..." required autocomplete="off">
+                    <label for="edit_usuario">Buscar Usuario: *</label>
+                    <input type="text" id="edit_usuario" name="usuario" 
+                           placeholder="Escriba el nombre o cédula del usuario..." 
+                           required autocomplete="off">
+                    <div id="dropdown_usuarios_editar" class="autocomplete-dropdown" style="display: none;"></div>
                 </div>
                 <div class="form-group">
                     <label for="edit_diagnostico">Diagnóstico:</label>
@@ -160,5 +166,6 @@
     </div>
 </div>
 
+<script src="consultas.js"></script>
 </body>
 </html>

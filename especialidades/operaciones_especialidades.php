@@ -22,7 +22,7 @@ class EspecialidadesRepository
 
     public function listar(): array
     {
-        $stmt = $this->pdo->query("SELECT id, nombre FROM especialidades ORDER BY nombre");
+        $stmt = $this->pdo->query("SELECT e.id, e.nombre, COUNT(d.id) as total_doctores FROM especialidades e LEFT JOIN doctores d ON e.id = d.id_especialidad GROUP BY e.id, e.nombre ORDER BY e.nombre");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

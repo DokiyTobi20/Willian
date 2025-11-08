@@ -20,7 +20,14 @@ if (!isset($_SESSION['usuario'])) {
 // Obtener lista de doctores y estadísticas
 try {
     $pdo = Conexion::conectar();
-    $sql = "SELECT d.*, e.nombre AS especialidad FROM doctores d LEFT JOIN especialidades e ON d.id_especialidad = e.id ORDER BY d.apellido, d.nombre";
+    $sql = "SELECT d.id, d.id_especialidad, 
+                   u.nombre, u.apellido, u.cedula, u.correo, u.telefono, 
+                   u.fecha_nacimiento, u.direccion,
+                   e.nombre AS especialidad 
+            FROM doctores d
+            INNER JOIN usuarios u ON d.id = u.id
+            LEFT JOIN especialidades e ON d.id_especialidad = e.id
+            ORDER BY u.apellido, u.nombre";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $doctores = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -63,23 +70,51 @@ try {
     <div class="stats">
         <div class="stat-card">
             <i class='bx bx-user-check'></i>
-            <h3 id="statTotalDoctores">0</h3>
+            <h3 id="statTotalDoctores"><?= $totalDoctores ?></h3>
             <p>Total Doctores</p>
         </div>
         <div class="stat-card">
             <i class='bx bx-plus-medical'></i>
-            <h3 id="statEspecialidades">0</h3>
+            <h3 id="statEspecialidades"><?= $totalEspecialidades ?></h3>
             <p>Especialidades Activas</p>
         </div>
         <div class="stat-card">
             <i class='bx bx-search-alt'></i>
-            <h3 id="contadorResultados">0</h3>
+            <h3 id="contadorResultados"><?= $totalDoctores ?></h3>
             <p>Doctores Mostrados</p>
         </div>
     </div>
 
     <div class="doctors-grid" id="doctoresGrid">
-        <!-- Deja este contenedor vacío para que agregues tarjetas de doctores a mano -->
+        <?php if (empty($doctores)): ?>
+            <div class="no-doctores" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                <i class='bx bx-user-x' style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
+                <h3>No hay doctores registrados</h3>
+                <p>Comienza agregando el primer doctor médico.</p>
+            </div>
+        <?php else: ?>
+            <?php foreach ($doctores as $doctor): ?>
+                <div class="doctor-card" data-doctor-id="<?= $doctor['id'] ?>">
+                    <div class="doctor-info">
+                        <h4><?= htmlspecialchars($doctor['nombre'] . ' ' . $doctor['apellido']) ?></h4>
+                        <p><i class='bx bx-id-card'></i> <?= htmlspecialchars($doctor['cedula']) ?></p>
+                        <p><i class='bx bx-envelope'></i> <?= htmlspecialchars($doctor['correo'] ?? 'N/A') ?></p>
+                        <p><i class='bx bx-plus-medical'></i> <?= htmlspecialchars($doctor['especialidad'] ?? 'Sin especialidad') ?></p>
+                        <?php if (!empty($doctor['telefono'])): ?>
+                            <p><i class='bx bx-phone'></i> <?= htmlspecialchars($doctor['telefono']) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="doctor-actions">
+                        <button class="btn-edit" onclick="editarDoctor(<?= $doctor['id'] ?>)">
+                            <i class='bx bx-edit'></i> Editar
+                        </button>
+                        <button class="btn-delete" onclick="eliminarDoctor(<?= $doctor['id'] ?>, '<?= htmlspecialchars($doctor['nombre'] . ' ' . $doctor['apellido'], ENT_QUOTES) ?>')">
+                            <i class='bx bx-trash'></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -92,7 +127,7 @@ try {
         </div>
         <div class="modal-body">
             <form id="formDoctor">
-                <!-- Sin campos ocultos ni backend -->
+                <input type="hidden" name="id" id="doctor_id">
 
                 <div class="form-row">
                     <div class="form-group">
