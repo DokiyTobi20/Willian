@@ -4,6 +4,7 @@ require_once __DIR__ . '/operaciones_panel.php';
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,12 +15,11 @@ require_once __DIR__ . '/operaciones_panel.php';
     <link rel="stylesheet" href="panel.css">
     <script src="panel.js" defer></script>
 </head>
+
 <body>
     <div class="menu-dashboard" id="menuDashboard">
-        <div class="top-menu">
-                <span>Sala de Rehabilitación</span>
-        </div>
-        
+
+
         <div class="user-profile">
             <div class="user-info">
                 <i class="bx bx-user-circle"></i>
@@ -28,17 +28,19 @@ require_once __DIR__ . '/operaciones_panel.php';
             <div class="user-role">
                 <span><?= htmlspecialchars($rol_texto) ?></span>
             </div>
+
         </div>
-        
+
         <div class="menu">
             <?= $menu_html ?>
         </div>
     </div>
-    
+
     <div class="panel-content">
         <div class="panel-unico">
             <div id="contenidoDinamico" class="contenido-dinamico"></div>
         </div>
     </div>
 </body>
+
 </html>
