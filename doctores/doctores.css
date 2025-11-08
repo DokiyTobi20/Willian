@@ -85,10 +85,10 @@ html, body {
 	margin: 0 auto;
 	padding: 0 1rem 20px 1rem;
 	box-sizing: border-box;
-	transition: max-width 0.3s;
+    max-width: 95%;
 }
 
-.menu-dashboard.collapsed ~ .panel-content .container {
+.menu-dashboard.collapsed ~ .panel-content  {
     max-width: calc(100vw - 80px);
 }
 

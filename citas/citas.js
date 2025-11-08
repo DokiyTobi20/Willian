@@ -23,7 +23,7 @@
 				if (Array.isArray(inscripciones) && inscripciones.length > 0) {
 					tbody.innerHTML = '';
 					inscripciones.forEach(item => {
-						tbody.innerHTML += `<tr><td>${item.numero}</td><td>${item.hora}</td><td>${item.paciente}</td></tr>`;
+						tbody.innerHTML += `<tr><td>${item.numero}</td><td>${item.hora}</td><td>${item.paciente}</td><td>${item.cedula}</td></tr>`;
 					});
 				} else {
 					tbody.innerHTML = '<tr><td colspan="3">No hay inscripciones en la lista de espera hoy.</td></tr>';
