@@ -165,7 +165,6 @@
 				})
 				.then(res => res.json())
 				.then(data => {
-					alert(data.mensaje || 'Registrado en lista de espera para las ' + horaDisponible);
 					mostrarListaEspera();
 					actualizarEstadisticas();
 				})
@@ -239,7 +238,6 @@
 				})
 				.then(res => res.json())
 				.then(data => {
-					alert(data.mensaje || 'Registrado en lista de espera');
 					cerrarModal();
 				})
 				.catch(() => {
