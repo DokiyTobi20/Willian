@@ -6,12 +6,49 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../BDD/conexion.php';
 
+// Configurar timezone de Venezuela
+date_default_timezone_set('America/Caracas');
+
 header('Content-Type: application/json');
 
 // Utilidad: respuesta JSON y salir
 function responder($data) {
 	echo json_encode($data);
 	exit;
+}
+
+// Función helper: obtener el rango de tiempo válido para la lista de espera actual
+// Las listas duran 24 horas: desde las 5 AM hasta las 3 PM del día siguiente
+function obtenerRangoListaEspera() {
+	$ahora = new DateTime('now', new DateTimeZone('America/Caracas'));
+	$horaActual = (int)$ahora->format('H');
+	
+	// Si es antes de las 5 AM, la lista válida empezó ayer a las 5 AM
+	// Si es entre 5 AM y 3 PM, la lista válida empezó hoy a las 5 AM
+	// Si es después de las 3 PM, la lista válida empezó hoy a las 5 AM (y termina mañana a las 3 PM)
+	
+	if ($horaActual < 5) {
+		// Antes de las 5 AM: la lista válida empezó ayer a las 5 AM
+		$inicio = clone $ahora;
+		$inicio->setTime(5, 0, 0);
+		$inicio->modify('-1 day');
+		$fin = clone $ahora;
+		$fin->setTime(15, 0, 0); // 3 PM
+	} else {
+		// Desde las 5 AM en adelante: la lista válida empezó hoy a las 5 AM
+		$inicio = clone $ahora;
+		$inicio->setTime(5, 0, 0);
+		$fin = clone $ahora;
+		$fin->setTime(15, 0, 0); // 3 PM
+		$fin->modify('+1 day'); // Termina mañana a las 3 PM
+	}
+	
+	return [
+		'inicio' => $inicio->format('Y-m-d H:i:s'),
+		'fin' => $fin->format('Y-m-d H:i:s'),
+		'inicio_obj' => $inicio,
+		'fin_obj' => $fin
+	];
 }
 
 // Obtener datos de usuario de la sesión activa y horas ocupadas en lista de espera
@@ -26,10 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['accion'])) {
 			'cedula' => $cedula
 		]);
 	} elseif ($_GET['accion'] === 'horas_lista_espera') {
-		$hoy = date('Y-m-d');
+		$rango = obtenerRangoListaEspera();
 		$pdo = Conexion::conectar();
-		$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE DATE(fecha_creacion) = ? LIMIT 1');
-		$stmt->execute([$hoy]);
+		$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE fecha_creacion >= ? AND fecha_creacion < ? ORDER BY fecha_creacion DESC LIMIT 1');
+		$stmt->execute([$rango['inicio'], $rango['fin']]);
 		$lista = $stmt->fetch(PDO::FETCH_ASSOC);
 		$horas = [];
 		if ($lista) {
@@ -38,16 +75,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['accion'])) {
 			$stmt->execute([$id_lista]);
 			$inscripciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			foreach ($inscripciones as $insc) {
-				$hora = sprintf('%02d:00', 7 + $insc['numero']); // Turno 1 = 8:00, 2 = 9:00, ...
+				// Turno 1 = 7:00 AM, 2 = 8:00 AM, ..., 8 = 2:00 PM
+				$hora = sprintf('%02d:00', 6 + $insc['numero']);
 				$horas[] = $hora;
 			}
 		}
 		responder($horas);
 	} elseif ($_GET['accion'] === 'inscripciones_lista_espera') {
-		$hoy = date('Y-m-d');
+		$rango = obtenerRangoListaEspera();
 		$pdo = Conexion::conectar();
-		$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE DATE(fecha_creacion) = ? LIMIT 1');
-		$stmt->execute([$hoy]);
+		$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE fecha_creacion >= ? AND fecha_creacion < ? ORDER BY fecha_creacion DESC LIMIT 1');
+		$stmt->execute([$rango['inicio'], $rango['fin']]);
 		$lista = $stmt->fetch(PDO::FETCH_ASSOC);
 		$result = [];
 		if ($lista) {
@@ -56,7 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['accion'])) {
 			$stmt->execute([$id_lista]);
 			$inscripciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			foreach ($inscripciones as $insc) {
-				$hora = sprintf('%02d:00', 7 + $insc['numero']); // Turno 1 = 8:00, 2 = 9:00, ...
+				// Turno 1 = 7:00 AM, 2 = 8:00 AM, ..., 8 = 2:00 PM
+				$hora = sprintf('%02d:00', 6 + $insc['numero']);
 				$result[] = [
 					'numero' => $insc['numero'],
 					'hora' => $hora,
@@ -67,12 +106,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['accion'])) {
 		}
 		responder($result);
 	} elseif ($_GET['accion'] === 'estadisticas_citas') {
+		$rango = obtenerRangoListaEspera();
 		$hoy = date('Y-m-d');
 		$pdo = Conexion::conectar();
 		
-		// 1. Citas de hoy: cantidad de usuarios en lista de espera de hoy
-		$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE DATE(fecha_creacion) = ? LIMIT 1');
-		$stmt->execute([$hoy]);
+		// 1. Citas de hoy: cantidad de usuarios en lista de espera activa
+		$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE fecha_creacion >= ? AND fecha_creacion < ? ORDER BY fecha_creacion DESC LIMIT 1');
+		$stmt->execute([$rango['inicio'], $rango['fin']]);
 		$lista = $stmt->fetch(PDO::FETCH_ASSOC);
 		$citasHoy = 0;
 		if ($lista) {
@@ -83,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['accion'])) {
 			$citasHoy = $result ? (int)$result['total'] : 0;
 		}
 		
-		// 2. Consultas: usuarios de lista de espera de hoy que tienen consulta de hoy
+		// 2. Consultas: usuarios de lista de espera activa que tienen consulta de hoy
 		$consultas = 0;
 		if ($lista) {
 			$id_lista = $lista['id'];
@@ -144,13 +184,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['accion'])) {
 						responder(['mensaje' => 'Usuario no encontrado.']);
 					}
 					$id_usuario = $usuario['id'];
-					// Buscar o crear lista_espera para hoy
-					$hoy = date('Y-m-d');
-					$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE DATE(fecha_creacion) = ? LIMIT 1');
-					$stmt->execute([$hoy]);
+					// Buscar o crear lista_espera activa (rango de 24 horas: 5 AM - 3 PM del día siguiente)
+					$rango = obtenerRangoListaEspera();
+					$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE fecha_creacion >= ? AND fecha_creacion < ? ORDER BY fecha_creacion DESC LIMIT 1');
+					$stmt->execute([$rango['inicio'], $rango['fin']]);
 					$lista = $stmt->fetch(PDO::FETCH_ASSOC);
 					if (!$lista) {
-						$pdo->prepare('INSERT INTO listas_espera (fecha_creacion) VALUES (NOW())')->execute();
+						// Crear nueva lista de espera con fecha/hora actual en timezone de Venezuela
+						$ahora = new DateTime('now', new DateTimeZone('America/Caracas'));
+						$fechaCreacion = $ahora->format('Y-m-d H:i:s');
+						$stmt = $pdo->prepare('INSERT INTO listas_espera (fecha_creacion) VALUES (?)');
+						$stmt->execute([$fechaCreacion]);
 						$id_lista = $pdo->lastInsertId();
 					} else {
 						$id_lista = $lista['id'];

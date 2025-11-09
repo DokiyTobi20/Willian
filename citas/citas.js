@@ -175,10 +175,9 @@
 			});
 		}
 
-		// Función para obtener la siguiente hora disponible desde las 8am en saltos de 1 hora
+		// Función para obtener la siguiente hora disponible desde las 5 AM hasta las 3 PM
 		async function obtenerSiguienteHoraDisponible() {
-			// Aquí deberías consultar al backend las horas ya ocupadas, pero para ejemplo local:
-			// Simula obtener la lista de horas ocupadas (debería venir de la BD)
+			// Obtener la lista de horas ocupadas desde el backend
 			let horasOcupadas = [];
 			try {
 				const resp = await fetch('../citas/operaciones_citas.php?accion=horas_lista_espera');
@@ -192,8 +191,8 @@
 					}
 				}
 			} catch {}
-			// Generar horas desde 08:00 hasta 18:00 (10 turnos)
-			for (let h = 8; h <= 18; h++) {
+			// Generar horas desde 05:00 hasta 15:00 (11 turnos: 5 AM a 3 PM)
+			for (let h = 5; h <= 15; h++) {
 				let hora = (h < 10 ? '0' : '') + h + ':00';
 				if (!horasOcupadas.includes(hora)) {
 					return hora;

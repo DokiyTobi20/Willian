@@ -12,6 +12,17 @@
         }
     }
 
+    // Helper robusto: determina si el usuario es paciente leyendo dataset o window.esPaciente
+    function esPacienteActual() {
+        try {
+            const cont = document.querySelector('.container[data-module="consultas"]');
+            if (cont && cont.dataset && typeof cont.dataset.esPaciente !== 'undefined') {
+                return cont.dataset.esPaciente === '1';
+            }
+        } catch (_) {}
+        return !!(window && window.esPaciente);
+    }
+
     function inicializarAutocompletado(inputId, dropdownId, idUsuarioInputId) {
         const inputUsuario = document.getElementById(inputId);
         if (!inputUsuario) return;
@@ -265,6 +276,11 @@
                 });
             }
             
+            // Salvaguarda: si es paciente, eliminar botones de edición/eliminación por si quedaron en cache/markup anterior
+            if (esPacienteActual()) {
+                document.querySelectorAll('.btn-edit, .btn-delete').forEach(el => el.remove());
+            }
+            
             actualizarContadores(lista);
             
             // Si hay un término de búsqueda activo, volver a aplicarlo
@@ -331,12 +347,14 @@
                 <button class="btn-view" onclick="verConsulta(${consulta.id})" title="Ver detalles">
                     <i class='bx bx-show'></i> Ver
                 </button>
+                ${esPacienteActual() ? '' : `
                 <button class="btn-edit" onclick="editarConsulta(${consulta.id})">
                     <i class='bx bx-edit'></i> Editar
                 </button>
                 <button class="btn-delete" onclick="eliminarConsulta(${consulta.id}, '${escapeHtmlAttr(pacienteNombre)}')">
                     <i class='bx bx-trash'></i> Eliminar
                 </button>
+                `}
             </div>
         `;
         

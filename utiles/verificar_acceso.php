@@ -12,12 +12,14 @@ require_once __DIR__ . '/../BDD/conexion.php';
 // 1 => Paciente, 2 => Doctor, 3 => Admin
 const PERMISOS_PANEL = [
     1 => [ // Paciente
-        'inicio/inicio',
+        'inicio',
+        'inicio/*',
         'citas/citas',
-        'consultas/consultas_main',
+        'consultas/consultas',
     ],
     2 => [ // Doctor
-        'inicio/inicio',
+        'inicio',
+        'inicio/*',
         'consultas/consultas',
     ],
     3 => [ // Administrador

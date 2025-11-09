@@ -22,11 +22,6 @@
             <i class='bx bx-search'></i>
         </div>
 
-        <div class="date-picker">
-            <label for="fecha">Fecha:</label>
-            <input type="date" id="fecha">
-        </div>
-
         <button class="btn-primary" id="btnListaEspera">
             <i class='bx bx-time-five'></i> Registrarme en lista de espera
         </button>
@@ -42,14 +37,42 @@
     <!-- Tabla de Citas -->
     <?php
     require_once __DIR__ . '/../BDD/conexion.php';
+    // Configurar timezone de Venezuela
+    date_default_timezone_set('America/Caracas');
+    
     $pdo = Conexion::conectar();
 
-    // Fecha de hoy (YYYY-MM-DD)
-    $hoy = date('Y-m-d');
+    // Función helper: obtener el rango de tiempo válido para la lista de espera actual
+    function obtenerRangoListaEspera() {
+        $ahora = new DateTime('now', new DateTimeZone('America/Caracas'));
+        $horaActual = (int)$ahora->format('H');
+        
+        if ($horaActual < 5) {
+            // Antes de las 5 AM: la lista válida empezó ayer a las 5 AM
+            $inicio = clone $ahora;
+            $inicio->setTime(5, 0, 0);
+            $inicio->modify('-1 day');
+            $fin = clone $ahora;
+            $fin->setTime(15, 0, 0); // 3 PM
+        } else {
+            // Desde las 5 AM en adelante: la lista válida empezó hoy a las 5 AM
+            $inicio = clone $ahora;
+            $inicio->setTime(5, 0, 0);
+            $fin = clone $ahora;
+            $fin->setTime(15, 0, 0); // 3 PM
+            $fin->modify('+1 day'); // Termina mañana a las 3 PM
+        }
+        
+        return [
+            'inicio' => $inicio->format('Y-m-d H:i:s'),
+            'fin' => $fin->format('Y-m-d H:i:s')
+        ];
+    }
 
-    // Buscamos la lista de espera creada hoy (si existe)
-    $stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE DATE(fecha_creacion) = ? LIMIT 1');
-    $stmt->execute([$hoy]);
+    // Buscamos la lista de espera activa (rango de 24 horas: 5 AM - 3 PM del día siguiente)
+    $rango = obtenerRangoListaEspera();
+    $stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE fecha_creacion >= ? AND fecha_creacion < ? ORDER BY fecha_creacion DESC LIMIT 1');
+    $stmt->execute([$rango['inicio'], $rango['fin']]);
     $lista = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $inscripciones = [];
@@ -92,7 +115,7 @@
                             <td><?= htmlspecialchars($item['turno']) ?></td>
                             <td>
                                 <?= is_numeric($item['turno'])
-                                    ? htmlspecialchars(sprintf('%02d:00', 7 + (int)$item['turno']))
+                                    ? htmlspecialchars(sprintf('%02d:00', 4 + (int)$item['turno']))
                                     : '' ?>
                             </td>
                             <td><?= htmlspecialchars($item['nombre_completo']) ?></td>

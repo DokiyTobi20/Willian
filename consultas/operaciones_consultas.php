@@ -37,13 +37,28 @@ class ConsultasRepository {
                 INNER JOIN doctores d ON c.id_doctor = d.id
                 INNER JOIN usuarios du ON d.id = du.id
                 LEFT JOIN especialidades e ON d.id_especialidad = e.id
-                ORDER BY c.fecha_consulta DESC, c.fecha_creacion DESC";
-        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+                WHERE 1=1";
+
+        $params = [];
+
+        if (isset($_SESSION['rol']) && $_SESSION['rol'] == 1) {
+            $sql .= " AND c.id_paciente = ?";
+            $params[] = $_SESSION['id'];
+        } elseif (isset($_SESSION['rol']) && $_SESSION['rol'] == 2) {
+            $sql .= " AND c.id_doctor = ?";
+            $params[] = $_SESSION['id'];
+        }
+
+        $sql .= " ORDER BY c.fecha_consulta DESC, c.fecha_creacion DESC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function obtenerPorId(int $id): ?array {
-        $stmt = $this->pdo->prepare("
-            SELECT c.id, c.id_paciente, c.id_doctor, c.fecha_consulta, 
+        $sql = "
+            SELECT c.id, c.id_paciente, c.id_doctor, c.fecha_consulta,
                    c.diagnostico, c.receta, c.observaciones,
                    u.nombre AS paciente_nombre, u.apellido AS paciente_apellido, u.cedula AS paciente_cedula,
                    d.id AS doctor_id, du.nombre AS doctor_nombre, du.apellido AS doctor_apellido
@@ -52,12 +67,26 @@ class ConsultasRepository {
             INNER JOIN doctores d ON c.id_doctor = d.id
             INNER JOIN usuarios du ON d.id = du.id
             WHERE c.id = ?
-        ");
-        $stmt->execute([$id]);
+        ";
+
+        $params = [$id];
+
+        if (isset($_SESSION['rol']) && $_SESSION['rol'] == 1) {
+            $sql .= " AND c.id_paciente = ?";
+            $params[] = $_SESSION['id'];
+        } elseif (isset($_SESSION['rol']) && $_SESSION['rol'] == 2) {
+            $sql .= " AND c.id_doctor = ?";
+            $params[] = $_SESSION['id'];
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
         $consulta = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if ($consulta && isset($consulta['doctor_id']) && !isset($consulta['id_doctor'])) {
             $consulta['id_doctor'] = $consulta['doctor_id'];
         }
+
         return $consulta ?: null;
     }
 

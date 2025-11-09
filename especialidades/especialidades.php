@@ -98,10 +98,7 @@ try {
                 <div class="no-especialidades">
                     <i class='bx bx-health'></i>
                     <h3>No hay especialidades registradas</h3>
-                    <p>Comienza agregando la primera especialidad médica.</p>
-                    <button class="btn-primary" onclick="abrirModalCrear()">
-                        <i class='bx bx-plus'></i> Agregar Primera Especialidad
-                    </button>
+                    <p>Utiliza el botón "Nueva Especialidad" en la parte superior para agregar una.</p>
                 </div>
             <?php else: ?>
                 <div class="resultados-info" style="margin-bottom: 15px; color:#6c757d;">

@@ -1,3 +1,8 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+$rol = $_SESSION['rol'] ?? 0;
+$esPaciente = ($rol == 1);
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,9 +11,18 @@
     <title>Gestión de Consultas</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="../consultas/consultas.css">
+    <script>
+      window.esPaciente = <?php echo $esPaciente ? 'true' : 'false'; ?>;
+    </script>
+    <?php if ($esPaciente): ?>
+    <style>
+      .rol-paciente .btn-edit,
+      .rol-paciente .btn-delete { display: none !important; }
+    </style>
+    <?php endif; ?>
 </head>
-<body>
-<div class="container" data-module="consultas">
+<body class="<?php echo $esPaciente ? 'rol-paciente' : ''; ?>">
+<div class="container" data-module="consultas" data-es-paciente="<?php echo $esPaciente ? '1' : '0'; ?>">
     <!-- Header -->
     <div class="header">
         <h1><i class='bx bx-clipboard'></i> Gestión de Consultas</h1>
@@ -21,9 +35,11 @@
             <input type="text" id="busquedaConsulta" placeholder="Buscar por paciente (nombre o cédula)...">
             <i class='bx bx-search'></i>
         </div>
+        <?php if (!$esPaciente): ?>
         <button class="btn-primary" id="btnNuevaConsulta">
             <i class='bx bx-plus'></i> Registrar Consulta
         </button>
+        <?php endif; ?>
     </div>
 
     <!-- Estadísticas -->
