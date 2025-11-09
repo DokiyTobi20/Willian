@@ -222,7 +222,7 @@
 
 /* Unificado con estilos.css: solo margin-left para separación del menú lateral */
 .panel-content {
-	margin-left: 320px;
+	margin-left: 250px;
 	padding: 2rem;
 	transition: margin-left 0.3s;
 	overflow-y: auto;

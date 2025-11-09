@@ -1,5 +1,5 @@
 // Encapsulado para evitar conflictos globales
-(function() {
+(function () {
     let modalEditar = null;
     let modalCrear = null;
     let handleWindowClick = null;
@@ -15,12 +15,12 @@
         modalCrear = document.getElementById('modalCrear');
 
         document.querySelectorAll('.close').forEach(close => {
-            close.addEventListener('click', function() {
+            close.addEventListener('click', function () {
                 cerrarModal();
             });
         });
 
-        handleWindowClick = function(event) {
+        handleWindowClick = function (event) {
             if (event.target === modalEditar || event.target === modalCrear) {
                 cerrarModal();
             }
@@ -31,7 +31,7 @@
     function inicializarEventos() {
         const formCrear = document.getElementById('formCrearEspecialidad');
         if (formCrear) {
-            formCrear.addEventListener('submit', function(e) {
+            formCrear.addEventListener('submit', function (e) {
                 e.preventDefault();
                 if (validarFormulario(this)) {
                     const data = new FormData(this);
@@ -42,7 +42,7 @@
 
         const formEditar = document.getElementById('formEditarEspecialidad');
         if (formEditar) {
-            formEditar.addEventListener('submit', function(e) {
+            formEditar.addEventListener('submit', function (e) {
                 e.preventDefault();
                 if (validarFormulario(this)) {
                     const data = new FormData(this);
@@ -67,7 +67,7 @@
         // Mostrar el modal al hacer clic en el botón "Nueva Especialidad"
         const botonNuevaEspecialidad = document.getElementById('botonNuevaEspecialidad');
         if (botonNuevaEspecialidad) {
-            botonNuevaEspecialidad.addEventListener('click', function() {
+            botonNuevaEspecialidad.addEventListener('click', function () {
                 const modalCrear = document.getElementById('modalCrear');
                 if (modalCrear) {
                     modalCrear.classList.add('show');
@@ -80,7 +80,7 @@
         // Cerrar el modal al hacer clic en el botón de cerrar
         const botonesCerrar = document.querySelectorAll('.close');
         botonesCerrar.forEach(boton => {
-            boton.addEventListener('click', function() {
+            boton.addEventListener('click', function () {
                 const modal = boton.closest('.modal');
                 if (modal) {
                     modal.classList.remove('show');
@@ -94,10 +94,10 @@
     function configurarValidaciones() {
         const inputs = document.querySelectorAll('input[name="nombre"]');
         inputs.forEach(input => {
-            input.addEventListener('input', function() {
+            input.addEventListener('input', function () {
                 validarNombreEspecialidad(this);
             });
-            input.addEventListener('blur', function() {
+            input.addEventListener('blur', function () {
                 validarNombreEspecialidad(this);
             });
         });
@@ -196,17 +196,16 @@
                     const form = document.getElementById('formCrearEspecialidad');
                     if (form) form.reset();
                     cerrarModal();
-                    // Siempre refrescar la vista completa para obtener datos actualizados del servidor
-                    refrescarGridEspecialidades();
-                    actualizarEstadisticas();
+                    // Actualizar estadísticas y grid sin recargar
+                    await actualizarEstadisticas();
+                    await refrescarGridEspecialidades();
+
                 } else if (accion === 'actualizar') {
                     cerrarModal();
-                    // Refrescar la vista completa para asegurar sincronización
-                    refrescarGridEspecialidades();
+                    await refrescarGridEspecialidades();
                 } else if (accion === 'eliminar') {
-                    // Refrescar la vista completa después de eliminar
-                    refrescarGridEspecialidades();
-                    actualizarEstadisticas();
+                    await actualizarEstadisticas();
+                    await refrescarGridEspecialidades();
                 }
             } else {
                 mostrarAlerta(msg, 'error');
@@ -231,7 +230,7 @@
         const totalDoctores = parseInt(esp.total_doctores || esp.totalDoctores || 0);
         const escNombre = escapeHtmlAttr(esp.nombre);
         const escNombreHtml = escapeHtml(esp.nombre);
-        
+
         let botonEliminar = '';
         if (totalDoctores === 0) {
             botonEliminar = `<button class="btn-delete" onclick="eliminarEspecialidad(${Number(esp.id)}, '${escNombre}')">
@@ -242,7 +241,7 @@
                 <i class='bx bx-lock'></i> Protegida
             </button>`;
         }
-        
+
         card.innerHTML = `
             <div class="especialidad-info">
                 <h4>${escNombreHtml}</h4>
@@ -297,50 +296,87 @@
                 return;
             }
             const lista = await resp.json();
-            const grid = document.querySelector('.especialidades-grid');
-            if (!grid) {
-                console.warn('No se encontró el grid de especialidades');
+            const tableContainer = document.querySelector('.table-container');
+
+            if (!tableContainer) {
+                console.warn('No se encontró el contenedor de la tabla');
                 return;
             }
+
             if (!Array.isArray(lista)) {
                 console.warn('La respuesta no es un array válido');
                 return;
             }
-            grid.innerHTML = '';
+
+            // Limpiar el contenedor
+            tableContainer.innerHTML = '';
+
             if (lista.length === 0) {
-                // Si no hay especialidades después de refrescar, recargar página para mostrar mensaje vacío
-                window.location.reload();
-                return;
-            }
-            // Agregar todas las especialidades en el orden que vienen del servidor
-            lista.forEach(esp => {
-                agregarCardEspecialidad(esp);
-            });
-            actualizarContador();
-            // Si hay un término de búsqueda activo, volver a aplicarlo
-            const searchInput = document.getElementById('nombreEspecialidad') || document.getElementById('busquedaEspecialidades');
-            if (searchInput && searchInput.value && searchInput.value.trim().length > 0) {
-                filtrarEspecialidades(searchInput.value.trim());
+                // Mostrar mensaje de "no hay especialidades"
+                tableContainer.innerHTML = `
+                <div class="no-especialidades">
+                    <i class='bx bx-health'></i>
+                    <h3>No hay especialidades registradas</h3>
+                    <p>Utiliza el botón "Nueva Especialidad" en la parte superior para agregar una.</p>
+                </div>
+            `;
+            } else {
+                // Mostrar contador y grid de especialidades
+                tableContainer.innerHTML = `
+                <div class="resultados-info" style="margin-bottom: 15px; color:#6c757d;">
+                    <span class="contador">${lista.length} especialidad${lista.length !== 1 ? 'es' : ''} registrada${lista.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="especialidades-grid"></div>
+            `;
+
+                const grid = tableContainer.querySelector('.especialidades-grid');
+                // Agregar todas las especialidades
+                lista.forEach(esp => {
+                    agregarCardEspecialidad(esp);
+                });
+
+                actualizarContador();
+
+                // Si hay un término de búsqueda activo, volver a aplicarlo
+                const searchInput = document.getElementById('nombreEspecialidad') || document.getElementById('busquedaEspecialidades');
+                if (searchInput && searchInput.value && searchInput.value.trim().length > 0) {
+                    filtrarEspecialidades(searchInput.value.trim());
+                }
             }
         } catch (e) {
             console.error('Error al refrescar el grid:', e);
-            // Si falla, recargar la página para asegurar sincronización
-            window.location.reload();
+            mostrarAlerta('Error al cargar las especialidades', 'error');
         }
     }
 
-    function actualizarEstadisticas() {
-        // Actualizar contador de total de especialidades
-        const grid = document.querySelector('.especialidades-grid');
-        if (grid) {
-            const totalCards = grid.querySelectorAll('.especialidad-card').length;
-            const contador = document.querySelector('.contador');
-            if (contador) {
-                contador.textContent = `${totalCards} especialidad${totalCards !== 1 ? 'es' : ''} registrada${totalCards !== 1 ? 's' : ''}`;
+    async function actualizarEstadisticas() {
+        try {
+            // Obtener estadísticas actualizadas del servidor
+            const resp = await fetch('../especialidades/operaciones_especialidades.php?accion=estadisticas', { credentials: 'same-origin' });
+            if (resp.ok) {
+                const stats = await resp.json();
+
+                // Actualizar las tarjetas de estadísticas
+                const statCards = document.querySelectorAll('.stat-card');
+                if (statCards.length >= 3) {
+                    // Total de Especialidades
+                    if (statCards[0].querySelector('h3')) {
+                        statCards[0].querySelector('h3').textContent = stats.totalEspecialidades || 0;
+                    }
+
+                    // Doctores Registrados
+                    if (statCards[1].querySelector('h3')) {
+                        statCards[1].querySelector('h3').textContent = stats.totalDoctores || 0;
+                    }
+
+                    // Especialidades Activas
+                    if (statCards[2].querySelector('h3')) {
+                        statCards[2].querySelector('h3').textContent = stats.especialidadesActivas || 0;
+                    }
+                }
             }
-            // También actualizar las estadísticas en las cards superiores si es necesario
-            // Para una actualización completa de estadísticas, sería mejor recargar la página
-            // o hacer una petición adicional al servidor
+        } catch (error) {
+            console.error('Error al actualizar estadísticas:', error);
         }
     }
 
@@ -482,6 +518,21 @@
         if (alerta) {
             alerta.remove();
         }
+    }
+
+    function obtenerEstadisticasDesdeGrid() {
+        const grid = document.querySelector('.especialidades-grid');
+        if (!grid) return { totalEspecialidades: 0, totalDoctores: 0, especialidadesActivas: 0 };
+
+        const cards = grid.querySelectorAll('.especialidad-card');
+        const totalEspecialidades = cards.length;
+
+        // Nota: Para estadísticas más precisas, sería mejor obtenerlas del servidor
+        return {
+            totalEspecialidades: totalEspecialidades,
+            totalDoctores: 0, // Esto debería venir del servidor
+            especialidadesActivas: totalEspecialidades // Simplificado
+        };
     }
 
     // Hacer funciones globales para uso en HTML
