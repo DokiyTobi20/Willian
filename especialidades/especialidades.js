@@ -359,7 +359,9 @@
             modalCrear = document.getElementById('modalCrear');
         }
         if (!modalCrear) return;
-        modalCrear.style.display = 'block';
+        modalCrear.style.display = 'flex';
+        modalCrear.style.justifyContent = "center";
+        modalCrear.style.alignItems = "center";
         document.body.style.overflow = 'hidden';
         setTimeout(() => {
             const input = document.getElementById('nombre');

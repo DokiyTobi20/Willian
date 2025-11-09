@@ -229,7 +229,9 @@
         const tituloEl = document.getElementById('modalTitulo');
         if (tituloEl) tituloEl.textContent = titulo;
         cargarEspecialidades();
-        modalDoctor.style.display = 'block';
+        modalDoctor.style.display = 'flex';
+        modalDoctor.style.justifyContent = "center";
+        modalDoctor.style.alignItems = "center";
         document.body.style.overflow = 'hidden';
         setTimeout(() => {
             const input = modalDoctor.querySelector('input');
