@@ -18,7 +18,7 @@
     <!-- Controles -->
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="busquedaConsulta" placeholder="Buscar por usuario, diagnóstico, medicación...">
+            <input type="text" id="busquedaConsulta" placeholder="Buscar por paciente (nombre o cédula)...">
             <i class='bx bx-search'></i>
         </div>
         <button class="btn-primary" id="btnNuevaConsulta">
@@ -45,28 +45,16 @@
         </div>
     </div>
 
-    <!-- Lista de Consultas -->
-    <div class="doctors-grid" id="consultasGrid">
-        <!-- Aquí se mostrarán las tarjetas de consultas, usando la clase doctor-card para cada consulta -->
-        <!-- Ejemplo de tarjeta:
-        <div class="doctor-card">
-            <div class="doctor-header">
-                <div class="doctor-avatar">C</div>
-                <div class="doctor-info">
-                    <h3>Usuario Ejemplo</h3>
-                    <span class="doctor-specialty">Diagnóstico: Gripe</span>
-                </div>
-            </div>
-            <div class="doctor-details">
-                <div class="doctor-detail"><i class='bx bx-capsule'></i> Medicación: Paracetamol</div>
-                <div class="doctor-detail"><i class='bx bx-comment'></i> Observaciones: Reposo 3 días</div>
-            </div>
-            <div class="doctor-actions">
-                <button class="btn-edit"><i class='bx bx-edit'></i> Editar</button>
-                <button class="btn-delete"><i class='bx bx-trash'></i> Eliminar</button>
+    <!-- Consultas Table/Grid -->
+    <div class="consultas-table">
+        <div class="table-header">
+            <h2>Consultas Registradas</h2>
+        </div>
+        <div class="table-container">
+            <div class="consultas-grid" id="consultasGrid">
+                <!-- Aquí se mostrarán las tarjetas de consultas -->
             </div>
         </div>
-        -->
     </div>
 </div>
 
@@ -134,8 +122,8 @@
                     <textarea id="edit_diagnostico" name="diagnostico" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="edit_medicacion">Medicación:</label>
-                    <textarea id="edit_medicacion" name="medicacion" required></textarea>
+                    <label for="edit_medicacion">Receta:</label>
+                    <textarea id="edit_medicacion" name="medicacion" placeholder="Escriba la receta médica..."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="edit_observaciones">Observaciones:</label>

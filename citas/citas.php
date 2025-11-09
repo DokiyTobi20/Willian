@@ -18,7 +18,7 @@
     <!-- Controles -->
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="busqueda" placeholder="Buscar por paciente o doctor...">
+            <input type="text" id="busqueda" placeholder="Buscar por paciente (nombre o cédula)...">
             <i class='bx bx-search'></i>
         </div>
 
@@ -34,10 +34,9 @@
 
     <!-- Estadísticas -->
     <div class="stats">
-        <div class="stat-card"><i class='bx bx-calendar'></i><h3>0</h3><p>Citas de hoy</p></div>
-        <div class="stat-card"><i class='bx bx-time'></i><h3>0</h3><p>Pendientes</p></div>
-        <div class="stat-card"><i class='bx bx-user-check'></i><h3>0</h3><p>En consulta</p></div>
-        <div class="stat-card"><i class='bx bx-check-circle'></i><h3>0</h3><p>Finalizadas</p></div>
+        <div class="stat-card"><i class='bx bx-calendar'></i><h3 id="statCitasHoy">0</h3><p>Citas de hoy</p></div>
+        <div class="stat-card"><i class='bx bx-clipboard'></i><h3 id="statConsultas">0</h3><p>Consultas</p></div>
+        <div class="stat-card"><i class='bx bx-check-circle'></i><h3 id="statFinalizadas">0</h3><p>Finalizadas</p></div>
     </div>
 
     <!-- Tabla de Citas -->

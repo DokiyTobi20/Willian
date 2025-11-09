@@ -18,6 +18,14 @@ class ConsultasRepository {
         return isset($_SESSION['rol']) && $_SESSION['rol'] == 3; // 3 = Administrador
     }
 
+    private function isDoctor(): bool {
+        return isset($_SESSION['rol']) && $_SESSION['rol'] == 2; // 2 = Doctor
+    }
+
+    private function isAdminOrDoctor(): bool {
+        return $this->isAdmin() || $this->isDoctor();
+    }
+
     public function listar(): array {
         $sql = "SELECT c.id, c.id_paciente, c.id_doctor, c.fecha_consulta, 
                        c.diagnostico, c.receta, c.observaciones, c.fecha_creacion,
@@ -46,11 +54,15 @@ class ConsultasRepository {
             WHERE c.id = ?
         ");
         $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $consulta = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($consulta && isset($consulta['doctor_id']) && !isset($consulta['id_doctor'])) {
+            $consulta['id_doctor'] = $consulta['doctor_id'];
+        }
+        return $consulta ?: null;
     }
 
     public function crear(array $data): array {
-        if (!$this->isAdmin()) {
+        if (!$this->isAdminOrDoctor()) {
             return ['status' => 'error', 'message' => 'Acceso no autorizado.'];
         }
 
@@ -109,7 +121,7 @@ class ConsultasRepository {
     }
 
     public function editar(array $data): array {
-        if (!$this->isAdmin()) {
+        if (!$this->isAdminOrDoctor()) {
             return ['status' => 'error', 'message' => 'Acceso no autorizado.'];
         }
 
@@ -161,7 +173,7 @@ class ConsultasRepository {
     }
 
     public function eliminar(int $id): array {
-        if (!$this->isAdmin()) {
+        if (!$this->isAdminOrDoctor()) {
             return ['status' => 'error', 'message' => 'Acceso no autorizado.'];
         }
 
@@ -251,7 +263,7 @@ try {
                     'id_doctor' => $_POST['id_doctor'] ?? null,
                     'fecha_cita' => $_POST['fecha_cita'] ?? null,
                     'diagnostico' => $_POST['diagnostico'] ?? null,
-                    'receta' => $_POST['receta'] ?? null,
+                    'receta' => $_POST['receta'] ?? $_POST['medicacion'] ?? null,
                     'observaciones' => $_POST['observaciones'] ?? null
                 ];
                 $response = $repository->editar($data);

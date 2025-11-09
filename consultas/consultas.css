@@ -30,86 +30,6 @@
     background-color: #f5f5f5;
 }
 
-.consulta-card {
-    background: white;
-    border-radius: 14px;
-    box-shadow: 0 4px 16px rgba(40,191,150,0.08);
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition: box-shadow 0.3s;
-}
-.consulta-card:hover {
-    box-shadow: 0 8px 32px rgba(40,191,150,0.18);
-}
-.consulta-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-.consulta-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #28bf96 0%, #209677 100%);
-    color: white;
-    font-size: 1.6em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-.consulta-details {
-    flex: 1;
-}
-.consulta-details h4 {
-    margin: 0;
-    font-size: 1.1em;
-    color: #209677;
-}
-.consulta-details p {
-    margin: 0;
-    color: #666;
-    font-size: 0.98em;
-}
-.consulta-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-}
-.btn-view, .btn-edit, .btn-delete {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.btn-view {
-    background: #17a2b8;
-    color: white;
-}
-.btn-view:hover {
-    background: #138496;
-}
-.btn-edit {
-    background: #28bf96;
-    color: white;
-}
-.btn-edit:hover {
-    background: #1e865f;
-}
-.btn-delete {
-    background: #dc3545;
-    color: white;
-}
-.btn-delete:hover {
-    background: #c82333;
-}
 #modalEditar .modal-content {
     margin: 5% auto;
     padding: 0;
@@ -184,8 +104,6 @@ body {
     gap: 20px;
     align-items: center;
     flex-wrap: wrap;
-    flex-direction: column;
-    align-items: stretch;
 }
 
 .search-box {
@@ -205,8 +123,8 @@ body {
 
 .search-box input:focus {
     outline: none;
-    border-color: #209677;
-    box-shadow: 0 0 0 3px rgba(32, 150, 119, 0.1);
+    border-color: #28bf96;
+    box-shadow: 0 0 0 3px rgba(40, 191, 150, 0.1);
 }
 
 .search-box i {
@@ -214,7 +132,7 @@ body {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: #209677;
+    color: #28bf96;
     font-size: 18px;
 }
 
@@ -230,18 +148,18 @@ body {
 
 .filter-select:focus {
     outline: none;
-    border-color: #209677;
-    box-shadow: 0 0 0 3px rgba(32, 150, 119, 0.1);
+    border-color: #28bf96;
+    box-shadow: 0 0 0 3px rgba(40, 191, 150, 0.1);
 }
 
 .btn-primary {
     background: linear-gradient(135deg, #28bf96 0%, #209677 100%);
     color: white;
     border: none;
-    padding: 12px 24px;
+    padding: 12px 25px;
     border-radius: 8px;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -251,7 +169,7 @@ body {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(32, 150, 119, 0.3);
+    box-shadow: 0 6px 20px rgba(40, 191, 150, 0.3);
 }
 
 .stats {
@@ -277,7 +195,7 @@ body {
 
 .stat-card i {
     font-size: 2.5em;
-    color: #209677;
+    color: #28bf96;
     margin-bottom: 15px;
 }
 
@@ -288,30 +206,84 @@ body {
 }
 
 .stat-card p {
-    color: #666;
+    color: #6c757d;
     font-size: 1.1em;
+}
+
+.consultas-table {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: visible;
+}
+
+.table-header {
+    background: linear-gradient(135deg, #28bf96 0%, #209677 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+}
+
+.table-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    font-weight: 500;
+}
+
+.table-container {
+    padding: 20px;
+}
+
+.no-consultas {
+    text-align: center;
+    padding: 50px 20px;
+    color: #6c757d;
+}
+
+.no-consultas i {
+    font-size: 3em;
+    margin-bottom: 20px;
+    opacity: 0.5;
 }
 
 .consultas-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 25px;
-    margin-bottom: 30px;
+    gap: 20px;
 }
 
-.consulta-card {
-    background: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.doctor-card {
+    background: #f8f9fa;
+    border: 1px solid #e1e5e9;
+    border-radius: 10px;
+    padding: 20px;
     transition: all 0.3s ease;
-    border-left: 4px solid #209677;
-    width: 400px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.consulta-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+.doctor-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-color: #28bf96;
+}
+
+.doctor-info h4 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.doctor-info p {
+    color: #6c757d;
+    font-size: 0.9em;
+    margin: 3px 0;
+}
+
+.doctor-actions {
+    display: flex;
+    gap: 10px;
 }
 
 .consulta-header {
@@ -461,9 +433,11 @@ body {
     justify-content: flex-end;
 }
 
-.btn-edit, .btn-view, .btn-delete {
-    padding: 8px 16px;
+.btn-edit {
+    background: #28bf96;
+    color: white;
     border: none;
+    padding: 8px 15px;
     border-radius: 6px;
     font-size: 14px;
     cursor: pointer;
@@ -473,31 +447,47 @@ body {
     gap: 5px;
 }
 
-.btn-edit {
-    background: #28bf96;
-    color: white;
-}
-
 .btn-edit:hover {
     background: #1e865f;
+    transform: translateY(-1px);
 }
 
 .btn-view {
     background: #17a2b8;
     color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .btn-view:hover {
     background: #138496;
+    transform: translateY(-1px);
 }
 
 .btn-delete {
     background: #dc3545;
     color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .btn-delete:hover {
     background: #c82333;
+    transform: translateY(-1px);
 }
 
 .modal {
@@ -595,8 +585,8 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #209677;
-    box-shadow: 0 0 0 3px rgba(32, 150, 119, 0.1);
+    border-color: #28bf96;
+    box-shadow: 0 0 0 3px rgba(40, 191, 150, 0.1);
 }
 
 .form-group textarea {
@@ -719,6 +709,14 @@ body {
     color: #0c5460;
 }
 
+/* Search results */
+.no-resultados-busqueda {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+    font-style: italic;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 15px;
@@ -739,6 +737,17 @@ body {
     
     .consultas-grid {
         grid-template-columns: 1fr;
+    }
+
+    .doctor-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .doctor-actions {
+        width: 100%;
+        justify-content: flex-end;
     }
     
     .form-row {

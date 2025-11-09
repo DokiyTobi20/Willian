@@ -7,6 +7,7 @@
     function boot() {
         inicializarModales();
         inicializarEventos();
+        cargarEspecialidadesFiltro();
         cargarDoctores();
     }
 
@@ -67,6 +68,157 @@
                 }
             });
         }
+
+        // Búsqueda de doctores
+        const searchInput = document.getElementById('busquedaDoctor');
+        if (searchInput) {
+            const debouncedFilter = debounce((value) => {
+                filtrarDoctores(value);
+            }, 250);
+            searchInput.addEventListener('input', (e) => {
+                debouncedFilter(e.target.value);
+            });
+            if (searchInput.value && searchInput.value.trim().length > 0) {
+                filtrarDoctores(searchInput.value.trim());
+            }
+        }
+
+        // Filtro por especialidad
+        const filtroEspecialidad = document.getElementById('filtroEspecialidad');
+        if (filtroEspecialidad) {
+            filtroEspecialidad.addEventListener('change', function() {
+                filtrarPorEspecialidad(this.value);
+            });
+        }
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function filtrarDoctores(termino) {
+        aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+        const grid = document.getElementById('doctoresGrid');
+        if (!grid) return;
+        const cards = grid.querySelectorAll('.doctor-card');
+        
+        // Obtener valores de los filtros
+        const searchInput = document.getElementById('busquedaDoctor');
+        const termino = searchInput ? searchInput.value.trim().toLowerCase() : '';
+        const filtroEspecialidad = document.getElementById('filtroEspecialidad');
+        const idEspecialidad = filtroEspecialidad ? filtroEspecialidad.value : '';
+        
+        let visibles = 0;
+        
+        cards.forEach(card => {
+            const info = card.querySelector('.doctor-info');
+            if (!info) return;
+            
+            // Verificar filtro de especialidad
+            let pasaEspecialidad = true;
+            if (idEspecialidad && idEspecialidad !== '') {
+                // Usar el atributo data-especialidad-id si está disponible
+                const cardEspecialidadId = card.getAttribute('data-especialidad-id');
+                if (cardEspecialidadId) {
+                    // Comparar directamente los IDs
+                    pasaEspecialidad = cardEspecialidadId === idEspecialidad;
+                } else {
+                    // Fallback: buscar por texto si no hay atributo data
+                    const especialidadP = Array.from(info.querySelectorAll('p')).find(p => {
+                        const icon = p.querySelector('i.bx-plus-medical');
+                        return icon !== null;
+                    });
+                    
+                    if (!especialidadP) {
+                        pasaEspecialidad = false;
+                    } else {
+                        // Extraer solo el texto de la especialidad (sin el icono)
+                        const especialidadTexto = especialidadP.textContent.trim().toLowerCase();
+                        const select = document.getElementById('filtroEspecialidad');
+                        const option = select ? select.querySelector(`option[value="${idEspecialidad}"]`) : null;
+                        const nombreEspecialidad = option ? option.textContent.trim().toLowerCase() : '';
+                        
+                        pasaEspecialidad = especialidadTexto === nombreEspecialidad || 
+                                          especialidadTexto.includes(nombreEspecialidad);
+                    }
+                }
+            }
+            
+            // Verificar filtro de búsqueda (solo por nombre o cédula del doctor)
+            let pasaBusqueda = true;
+            if (termino && termino.length > 0) {
+                const nombre = (info.querySelector('h4')?.textContent || '').toLowerCase();
+                const cedula = Array.from(info.querySelectorAll('p')).find(p => p.textContent.includes('bx-id-card'))?.textContent.toLowerCase() || '';
+                // Solo buscar por nombre o cédula
+                pasaBusqueda = nombre.includes(termino) || cedula.includes(termino);
+            }
+            
+            // Mostrar si pasa ambos filtros
+            if (pasaEspecialidad && pasaBusqueda) {
+                card.style.display = 'flex';
+                visibles++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Actualizar contador
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            let resultadosInfo = tableContainer.querySelector('.resultados-info');
+            if (resultadosInfo) {
+                const total = grid.querySelectorAll('.doctor-card').length;
+                if (visibles === total && !termino && !idEspecialidad) {
+                    resultadosInfo.innerHTML = `<span class="contador">${total} doctor${total !== 1 ? 'es' : ''} registrado${total !== 1 ? 's' : ''}</span>`;
+                } else {
+                    resultadosInfo.innerHTML = `<span class="contador">${visibles} doctor${visibles !== 1 ? 'es' : ''} encontrado${visibles !== 1 ? 's' : ''}</span>`;
+                }
+            }
+        }
+        
+        // Actualizar contador de estadísticas
+        const contadorResultados = document.getElementById('contadorResultados');
+        if (contadorResultados) {
+            contadorResultados.textContent = visibles;
+        }
+        
+        // Mostrar mensaje si no hay resultados
+        const mensajeNoResultados = tableContainer?.querySelector('.no-resultados-busqueda');
+        if (mensajeNoResultados) {
+            mensajeNoResultados.remove();
+        }
+        
+        if (visibles === 0 && (termino.length > 0 || idEspecialidad)) {
+            const noResultadosDiv = document.createElement('div');
+            noResultadosDiv.className = 'no-resultados-busqueda';
+            noResultadosDiv.style.textAlign = 'center';
+            noResultadosDiv.style.padding = '40px 20px';
+            noResultadosDiv.style.color = '#6c757d';
+            noResultadosDiv.style.fontStyle = 'italic';
+            let mensaje = 'No se encontraron doctores';
+            if (termino.length > 0 && idEspecialidad) {
+                mensaje = `No se encontraron doctores que coincidan con "${escapeHtml(termino)}" y la especialidad seleccionada`;
+            } else if (termino.length > 0) {
+                mensaje = `No se encontraron doctores que coincidan con "${escapeHtml(termino)}"`;
+            } else if (idEspecialidad) {
+                mensaje = 'No se encontraron doctores con la especialidad seleccionada';
+            }
+            noResultadosDiv.innerHTML = `<i class='bx bx-search-alt' style="font-size: 3em; opacity: 0.5; margin-bottom: 15px; display: block;"></i><p>${mensaje}</p>`;
+            if (tableContainer) {
+                tableContainer.insertBefore(noResultadosDiv, grid);
+            }
+        }
     }
 
     function abrirModalDoctor(titulo = 'Registrar Nuevo Doctor') {
@@ -112,6 +264,31 @@
             console.error('Error cargando especialidades:', e);
             select.innerHTML = '<option value="">Error al cargar especialidades</option>';
         }
+    }
+
+    async function cargarEspecialidadesFiltro() {
+        const select = document.getElementById('filtroEspecialidad');
+        if (!select) return;
+        try {
+            const url = getRutaOperaciones('especialidades') + '?accion=listar';
+            const resp = await fetch(url, { credentials: 'same-origin' });
+            if (!resp.ok) throw new Error('No se pudo cargar especialidades');
+            const lista = await resp.json();
+            let options = '<option value="">Todas las especialidades</option>';
+            if (Array.isArray(lista)) {
+                for (const esp of lista) {
+                    options += `<option value="${esp.id}">${esp.nombre}</option>`;
+                }
+            }
+            select.innerHTML = options;
+        } catch (e) {
+            console.error('Error cargando especialidades para filtro:', e);
+            select.innerHTML = '<option value="">Error al cargar especialidades</option>';
+        }
+    }
+
+    function filtrarPorEspecialidad(idEspecialidad) {
+        aplicarFiltros();
     }
 
     function cerrarModal() {
@@ -428,24 +605,55 @@
                 return;
             }
             
+            // Obtener el contenedor de la tabla
+            const tableContainer = document.querySelector('.table-container');
+            if (!tableContainer) {
+                console.warn('No se encontró el contenedor de la tabla');
+                return;
+            }
+            
             // Limpiar grid
             grid.innerHTML = '';
             
+            // Limpiar contador de resultados si existe
+            const resultadosInfo = tableContainer.querySelector('.resultados-info');
+            if (resultadosInfo) {
+                resultadosInfo.remove();
+            }
+            
+            // Limpiar mensaje de no doctores si existe
+            const noDoctores = tableContainer.querySelector('.no-doctores');
+            if (noDoctores) {
+                noDoctores.remove();
+            }
+            
             if (lista.length === 0) {
-                grid.innerHTML = `
-                    <div class="no-doctores" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                        <i class='bx bx-user-x' style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
-                        <h3>No hay doctores registrados</h3>
-                        <p>Comienza agregando el primer doctor médico.</p>
-                    </div>
+                const noDoctoresDiv = document.createElement('div');
+                noDoctoresDiv.className = 'no-doctores';
+                noDoctoresDiv.innerHTML = `
+                    <i class='bx bx-user-x'></i>
+                    <h3>No hay doctores registrados</h3>
+                    <p>Comienza agregando el primer doctor médico.</p>
                 `;
+                tableContainer.appendChild(noDoctoresDiv);
             } else {
+                // Agregar contador de resultados
+                const resultadosInfoDiv = document.createElement('div');
+                resultadosInfoDiv.className = 'resultados-info';
+                resultadosInfoDiv.style.marginBottom = '15px';
+                resultadosInfoDiv.style.color = '#6c757d';
+                resultadosInfoDiv.innerHTML = `<span class="contador">${lista.length} doctor${lista.length !== 1 ? 'es' : ''} registrado${lista.length !== 1 ? 's' : ''}</span>`;
+                tableContainer.insertBefore(resultadosInfoDiv, grid);
+                
                 lista.forEach(doctor => {
                     agregarCardDoctor(doctor);
                 });
             }
             
             actualizarContadores(lista);
+            
+            // Reaplicar filtros si hay alguno activo
+            aplicarFiltros();
         } catch (e) {
             console.error('Error al cargar doctores:', e);
         }
@@ -485,6 +693,11 @@
             </div>
         `;
         
+        // Agregar atributo data para facilitar el filtrado por especialidad
+        if (doctor.id_especialidad) {
+            card.setAttribute('data-especialidad-id', doctor.id_especialidad);
+        }
+        
         grid.appendChild(card);
     }
 
@@ -499,6 +712,15 @@
         if (statTotal) statTotal.textContent = total;
         if (statEspecialidades) statEspecialidades.textContent = especialidadesUnicas.size;
         if (contadorResultados) contadorResultados.textContent = total;
+        
+        // Actualizar contador dentro del contenedor de la tabla
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            let resultadosInfo = tableContainer.querySelector('.resultados-info');
+            if (resultadosInfo && total > 0) {
+                resultadosInfo.innerHTML = `<span class="contador">${total} doctor${total !== 1 ? 'es' : ''} registrado${total !== 1 ? 's' : ''}</span>`;
+            }
+        }
     }
 
     function escapeHtml(text) {

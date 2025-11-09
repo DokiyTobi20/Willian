@@ -8,31 +8,92 @@
 		inicializarModales();
 		inicializarEventos();
 		mostrarListaEspera();
+		actualizarEstadisticas();
 	}
+
+	// Actualizar estadísticas
+	async function actualizarEstadisticas() {
+		try {
+			const resp = await fetch('../citas/operaciones_citas.php?accion=estadisticas_citas');
+			if (resp.ok) {
+				const stats = await resp.json();
+				const statCitasHoy = document.getElementById('statCitasHoy');
+				const statConsultas = document.getElementById('statConsultas');
+				const statFinalizadas = document.getElementById('statFinalizadas');
+				
+				if (statCitasHoy) {
+					statCitasHoy.textContent = stats.citas_hoy || 0;
+				}
+				if (statConsultas) {
+					statConsultas.textContent = stats.consultas || 0;
+				}
+				if (statFinalizadas) {
+					statFinalizadas.textContent = stats.finalizadas || 0;
+				}
+			}
+		} catch (error) {
+			console.error('Error al cargar estadísticas:', error);
+		}
+	}
+
+	// Variable para almacenar todas las inscripciones
+	let todasLasInscripciones = [];
+
 	// Mostrar la lista de espera en la tabla
 	async function mostrarListaEspera() {
 		const tabla = document.getElementById('tablaListaEspera');
 		if (!tabla) return;
 		const tbody = tabla.querySelector('tbody');
-		tbody.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
+		tbody.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
 		try {
 			// Obtener inscripciones de la lista de espera de hoy
 			const resp = await fetch('../citas/operaciones_citas.php?accion=inscripciones_lista_espera');
 			if (resp.ok) {
 				const inscripciones = await resp.json();
-				if (Array.isArray(inscripciones) && inscripciones.length > 0) {
-					tbody.innerHTML = '';
-					inscripciones.forEach(item => {
-						tbody.innerHTML += `<tr><td>${item.numero}</td><td>${item.hora}</td><td>${item.paciente}</td><td>${item.cedula}</td></tr>`;
-					});
-				} else {
-					tbody.innerHTML = '<tr><td colspan="3">No hay inscripciones en la lista de espera hoy.</td></tr>';
-				}
+				todasLasInscripciones = Array.isArray(inscripciones) ? inscripciones : [];
+				filtrarListaEspera();
 			} else {
-				tbody.innerHTML = '<tr><td colspan="3">Error al cargar la lista de espera.</td></tr>';
+				tbody.innerHTML = '<tr><td colspan="4">Error al cargar la lista de espera.</td></tr>';
 			}
 		} catch {
-			tbody.innerHTML = '<tr><td colspan="3">Error al cargar la lista de espera.</td></tr>';
+			tbody.innerHTML = '<tr><td colspan="4">Error al cargar la lista de espera.</td></tr>';
+		}
+		// Actualizar estadísticas después de cargar la lista
+		actualizarEstadisticas();
+	}
+
+	// Filtrar lista de espera por búsqueda
+	function filtrarListaEspera() {
+		const tabla = document.getElementById('tablaListaEspera');
+		if (!tabla) return;
+		const tbody = tabla.querySelector('tbody');
+		const busquedaInput = document.getElementById('busqueda');
+		const termino = busquedaInput ? busquedaInput.value.trim().toLowerCase() : '';
+		
+		if (todasLasInscripciones.length === 0) {
+			tbody.innerHTML = '<tr><td colspan="4">No hay inscripciones en la lista de espera hoy.</td></tr>';
+			return;
+		}
+		
+		// Filtrar por nombre o cédula del paciente
+		const inscripcionesFiltradas = todasLasInscripciones.filter(item => {
+			if (!termino) return true;
+			const nombreCompleto = (item.paciente || '').toLowerCase();
+			const cedula = (item.cedula || '').toLowerCase();
+			return nombreCompleto.includes(termino) || cedula.includes(termino);
+		});
+		
+		if (inscripcionesFiltradas.length > 0) {
+			tbody.innerHTML = '';
+			inscripcionesFiltradas.forEach(item => {
+				tbody.innerHTML += `<tr><td>${item.numero}</td><td>${item.hora}</td><td>${item.paciente}</td><td>${item.cedula}</td></tr>`;
+			});
+		} else {
+			if (termino) {
+				tbody.innerHTML = `<tr><td colspan="4">No se encontraron pacientes que coincidan con "${termino}"</td></tr>`;
+			} else {
+				tbody.innerHTML = '<tr><td colspan="4">No hay inscripciones en la lista de espera hoy.</td></tr>';
+			}
 		}
 	}
 
@@ -53,6 +114,14 @@
 	}
 
 	function inicializarEventos() {
+		// Búsqueda en lista de espera
+		const busquedaInput = document.getElementById('busqueda');
+		if (busquedaInput) {
+			busquedaInput.addEventListener('input', function() {
+				filtrarListaEspera();
+			});
+		}
+
 		const btnAbrirAgendar = document.getElementById('btnAbrirAgendar');
 		if (btnAbrirAgendar) {
 			btnAbrirAgendar.addEventListener('click', abrirModalAgendarCita);
@@ -98,6 +167,7 @@
 				.then(data => {
 					alert(data.mensaje || 'Registrado en lista de espera para las ' + horaDisponible);
 					mostrarListaEspera();
+					actualizarEstadisticas();
 				})
 				.catch(() => {
 					alert('Error al registrar en lista de espera');

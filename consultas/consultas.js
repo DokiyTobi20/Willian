@@ -220,24 +220,58 @@
                 return;
             }
             
-            grid.innerHTML = '';
-            
-            if (lista.length === 0) {
-                grid.innerHTML = `
-                    <div class="no-consultas" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                        <i class='bx bx-clipboard' style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
-                        <h3>No hay consultas registradas</h3>
-                        <p>Comienza agregando la primera consulta médica.</p>
-                    </div>
-                `;
+            // Obtener el contenedor de la tabla
+            const tableContainer = document.querySelector('.table-container');
+            if (!tableContainer) {
+                console.warn('No se encontró el contenedor de la tabla');
                 return;
             }
             
-            lista.forEach(consulta => {
-                agregarCardConsulta(consulta);
-            });
+            // Limpiar grid
+            grid.innerHTML = '';
+            
+            // Limpiar contador de resultados si existe
+            const resultadosInfo = tableContainer.querySelector('.resultados-info');
+            if (resultadosInfo) {
+                resultadosInfo.remove();
+            }
+            
+            // Limpiar mensaje de no consultas si existe
+            const noConsultas = tableContainer.querySelector('.no-consultas');
+            if (noConsultas) {
+                noConsultas.remove();
+            }
+            
+            if (lista.length === 0) {
+                const noConsultasDiv = document.createElement('div');
+                noConsultasDiv.className = 'no-consultas';
+                noConsultasDiv.innerHTML = `
+                    <i class='bx bx-clipboard'></i>
+                    <h3>No hay consultas registradas</h3>
+                    <p>Comienza agregando la primera consulta médica.</p>
+                `;
+                tableContainer.appendChild(noConsultasDiv);
+            } else {
+                // Agregar contador de resultados
+                const resultadosInfoDiv = document.createElement('div');
+                resultadosInfoDiv.className = 'resultados-info';
+                resultadosInfoDiv.style.marginBottom = '15px';
+                resultadosInfoDiv.style.color = '#6c757d';
+                resultadosInfoDiv.innerHTML = `<span class="contador">${lista.length} consulta${lista.length !== 1 ? 's' : ''} registrada${lista.length !== 1 ? 's' : ''}</span>`;
+                tableContainer.insertBefore(resultadosInfoDiv, grid);
+                
+                lista.forEach(consulta => {
+                    agregarCardConsulta(consulta);
+                });
+            }
             
             actualizarContadores(lista);
+            
+            // Si hay un término de búsqueda activo, volver a aplicarlo
+            const searchInput = document.getElementById('busquedaConsulta');
+            if (searchInput && searchInput.value && searchInput.value.trim().length > 0) {
+                filtrarConsultas(searchInput.value.trim());
+            }
         } catch (error) {
             console.error('Error al cargar consultas:', error);
         }
@@ -272,6 +306,19 @@
             });
         }
         
+        // Determinar si la consulta está completa (tiene diagnóstico, receta y observaciones)
+        const tieneDiagnostico = consulta.diagnostico && consulta.diagnostico.trim().length > 0;
+        const tieneReceta = consulta.receta && consulta.receta.trim().length > 0;
+        const tieneObservaciones = consulta.observaciones && consulta.observaciones.trim().length > 0;
+        const estaCompleta = tieneDiagnostico && tieneReceta && tieneObservaciones;
+        
+        // Agregar atributo data para indicar el estado
+        if (estaCompleta) {
+            card.setAttribute('data-consulta-completa', 'true');
+        } else {
+            card.setAttribute('data-consulta-completa', 'false');
+        }
+        
         card.innerHTML = `
             <div class="doctor-info">
                 <h4>${pacienteNombre}</h4>
@@ -299,22 +346,33 @@
     function actualizarContadores(consultas = null) {
         let total = 0;
         let completadas = 0;
+        let pendientes = 0;
         
         if (consultas && Array.isArray(consultas)) {
             total = consultas.length;
-            // Todas las consultas tienen fecha_consulta, así que todas están completadas
-            completadas = total;
+            // Contar consultas completadas (tienen diagnóstico, receta y observaciones)
+            completadas = consultas.filter(consulta => {
+                const tieneDiagnostico = consulta.diagnostico && consulta.diagnostico.trim().length > 0;
+                const tieneReceta = consulta.receta && consulta.receta.trim().length > 0;
+                const tieneObservaciones = consulta.observaciones && consulta.observaciones.trim().length > 0;
+                return tieneDiagnostico && tieneReceta && tieneObservaciones;
+            }).length;
+            pendientes = total - completadas;
         } else {
             // Si no se pasan consultas, contar las tarjetas en el grid
             const grid = document.getElementById('consultasGrid');
             if (grid) {
                 const cards = grid.querySelectorAll('.doctor-card');
                 total = cards.length;
-                completadas = total; // Todas las consultas registradas están completadas
+                
+                // Contar completadas usando el atributo data
+                completadas = Array.from(cards).filter(card => {
+                    return card.getAttribute('data-consulta-completa') === 'true';
+                }).length;
+                
+                pendientes = total - completadas;
             }
         }
-        
-        const pendientes = 0; // Por ahora no hay pendientes, todas están completadas
         
         const statTotal = document.getElementById('statTotalConsultas');
         if (statTotal) {
@@ -329,6 +387,15 @@
         const statPendientes = document.getElementById('statPendientes');
         if (statPendientes) {
             statPendientes.textContent = pendientes;
+        }
+        
+        // Actualizar contador dentro del contenedor de la tabla
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer && total > 0) {
+            let resultadosInfo = tableContainer.querySelector('.resultados-info');
+            if (resultadosInfo) {
+                resultadosInfo.innerHTML = `<span class="contador">${total} consulta${total !== 1 ? 's' : ''} registrada${total !== 1 ? 's' : ''}</span>`;
+            }
         }
     }
 
@@ -445,8 +512,55 @@
     }
 
     async function editarConsulta(id) {
-        // TODO: Implementar edición
-        console.log('Editar consulta:', id);
+        try {
+            const url = getRutaOperaciones('consultas') + `?accion=obtener&id=${id}`;
+            const resp = await fetch(url, { credentials: 'same-origin' });
+            
+            if (!resp.ok) {
+                throw new Error('No se pudo cargar los datos de la consulta');
+            }
+            
+            const consulta = await resp.json();
+            
+            if (!consulta || !consulta.id) {
+                mostrarAlerta('No se encontraron los datos de la consulta', 'error');
+                return;
+            }
+            
+            // Llenar el formulario de edición
+            const editId = document.getElementById('edit_id');
+            const idUsuarioEditar = document.getElementById('id_usuario_editar');
+            const editUsuario = document.getElementById('edit_usuario');
+            const editDiagnostico = document.getElementById('edit_diagnostico');
+            const editMedicacion = document.getElementById('edit_medicacion');
+            const editObservaciones = document.getElementById('edit_observaciones');
+            
+            if (editId) editId.value = consulta.id;
+            if (idUsuarioEditar) idUsuarioEditar.value = consulta.id_paciente;
+            
+            // Llenar el nombre del usuario en el campo de búsqueda
+            const pacienteNombre = `${consulta.paciente_nombre || ''} ${consulta.paciente_apellido || ''}`.trim();
+            const pacienteCedula = consulta.paciente_cedula || '';
+            if (editUsuario) {
+                editUsuario.value = `${pacienteNombre} (${pacienteCedula})`;
+            }
+            
+            if (editDiagnostico) editDiagnostico.value = consulta.diagnostico || '';
+            if (editMedicacion) editMedicacion.value = consulta.receta || '';
+            if (editObservaciones) editObservaciones.value = consulta.observaciones || '';
+            
+            // Abrir el modal de edición
+            if (modalEditar) {
+                modalEditar.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => {
+                    if (editUsuario) editUsuario.focus();
+                }, 100);
+            }
+        } catch (error) {
+            console.error('Error al cargar consulta para editar:', error);
+            mostrarAlerta('Error al cargar los datos de la consulta: ' + error.message, 'error');
+        }
     }
 
     async function eliminarConsulta(id, nombre) {
@@ -563,6 +677,92 @@
                 }
             });
         }
+
+        // Búsqueda de consultas
+        const searchInput = document.getElementById('busquedaConsulta');
+        if (searchInput) {
+            const debouncedFilter = debounce((value) => {
+                filtrarConsultas(value);
+            }, 250);
+            searchInput.addEventListener('input', (e) => {
+                debouncedFilter(e.target.value);
+            });
+            if (searchInput.value && searchInput.value.trim().length > 0) {
+                filtrarConsultas(searchInput.value.trim());
+            }
+        }
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function filtrarConsultas(termino) {
+        const grid = document.getElementById('consultasGrid');
+        if (!grid) return;
+        const cards = grid.querySelectorAll('.doctor-card');
+        const terminoLower = (termino || '').toLowerCase();
+        let visibles = 0;
+        
+        cards.forEach(card => {
+            const info = card.querySelector('.doctor-info');
+            if (!info) return;
+            
+            // Buscar solo por nombre o cédula del paciente
+            const nombre = (info.querySelector('h4')?.textContent || '').toLowerCase();
+            const cedula = Array.from(info.querySelectorAll('p')).find(p => p.textContent.includes('bx-id-card'))?.textContent.toLowerCase() || '';
+            
+            // Solo buscar en nombre y cédula del paciente
+            const coincide = terminoLower.length === 0 || nombre.includes(terminoLower) || cedula.includes(terminoLower);
+            
+            if (coincide) {
+                card.style.display = 'flex';
+                visibles++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Actualizar contador
+        const tableContainer = document.querySelector('.table-container');
+        if (tableContainer) {
+            let resultadosInfo = tableContainer.querySelector('.resultados-info');
+            if (resultadosInfo) {
+                if (terminoLower.length === 0) {
+                    const total = grid.querySelectorAll('.doctor-card').length;
+                    resultadosInfo.innerHTML = `<span class="contador">${total} consulta${total !== 1 ? 's' : ''} registrada${total !== 1 ? 's' : ''}</span>`;
+                } else {
+                    resultadosInfo.innerHTML = `<span class="contador">${visibles} consulta${visibles !== 1 ? 's' : ''} encontrada${visibles !== 1 ? 's' : ''}</span>`;
+                }
+            }
+        }
+        
+        // Mostrar mensaje si no hay resultados
+        const mensajeNoResultados = tableContainer?.querySelector('.no-resultados-busqueda');
+        if (mensajeNoResultados) {
+            mensajeNoResultados.remove();
+        }
+        
+        if (visibles === 0 && terminoLower.length > 0) {
+            const noResultadosDiv = document.createElement('div');
+            noResultadosDiv.className = 'no-resultados-busqueda';
+            noResultadosDiv.style.textAlign = 'center';
+            noResultadosDiv.style.padding = '40px 20px';
+            noResultadosDiv.style.color = '#6c757d';
+            noResultadosDiv.style.fontStyle = 'italic';
+            noResultadosDiv.innerHTML = `<i class='bx bx-search-alt' style="font-size: 3em; opacity: 0.5; margin-bottom: 15px; display: block;"></i><p>No se encontraron consultas que coincidan con "${escapeHtml(termino)}"</p>`;
+            if (tableContainer) {
+                tableContainer.insertBefore(noResultadosDiv, grid);
+            }
+        }
     }
 
     function validarFormularioConsulta(form) {
@@ -617,15 +817,30 @@
             const data = {
                 id_usuario: formData.get('id_usuario'),
                 diagnostico: formData.get('diagnostico'),
-                receta: formData.get('receta') || null,
+                receta: formData.get('medicacion') || formData.get('receta') || null,
                 observaciones: formData.get('observaciones') || null
             };
 
-            // Si es edición, agregar el ID
+            // Si es edición, agregar el ID, id_doctor y fecha_cita
             if (accion === 'editar') {
                 const idInput = document.querySelector(`#formEditarConsulta [name="id"]`);
                 if (idInput) {
                     data.id = idInput.value;
+                }
+                
+                // Obtener id_doctor y fecha_cita de la consulta original
+                try {
+                    const urlObtener = getRutaOperaciones('consultas') + `?accion=obtener&id=${data.id}`;
+                    const respObtener = await fetch(urlObtener, { credentials: 'same-origin' });
+                    if (respObtener.ok) {
+                        const consultaOriginal = await respObtener.json();
+                        if (consultaOriginal) {
+                            data.id_doctor = consultaOriginal.id_doctor || consultaOriginal.doctor_id;
+                            data.fecha_cita = consultaOriginal.fecha_consulta;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('No se pudo obtener datos de la consulta original:', e);
                 }
             }
 

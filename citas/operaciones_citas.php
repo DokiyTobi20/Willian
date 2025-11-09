@@ -66,6 +66,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['accion'])) {
 			}
 		}
 		responder($result);
+	} elseif ($_GET['accion'] === 'estadisticas_citas') {
+		$hoy = date('Y-m-d');
+		$pdo = Conexion::conectar();
+		
+		// 1. Citas de hoy: cantidad de usuarios en lista de espera de hoy
+		$stmt = $pdo->prepare('SELECT id FROM listas_espera WHERE DATE(fecha_creacion) = ? LIMIT 1');
+		$stmt->execute([$hoy]);
+		$lista = $stmt->fetch(PDO::FETCH_ASSOC);
+		$citasHoy = 0;
+		if ($lista) {
+			$id_lista = $lista['id'];
+			$stmt = $pdo->prepare('SELECT COUNT(*) as total FROM lista_espera_inscripciones WHERE id_lista = ?');
+			$stmt->execute([$id_lista]);
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			$citasHoy = $result ? (int)$result['total'] : 0;
+		}
+		
+		// 2. Consultas: usuarios de lista de espera de hoy que tienen consulta de hoy
+		$consultas = 0;
+		if ($lista) {
+			$id_lista = $lista['id'];
+			$stmt = $pdo->prepare('
+				SELECT COUNT(DISTINCT le.id_usuario) as total
+				FROM lista_espera_inscripciones le
+				INNER JOIN consultas c ON le.id_usuario = c.id_paciente
+				WHERE le.id_lista = ? AND DATE(c.fecha_consulta) = ?
+			');
+			$stmt->execute([$id_lista, $hoy]);
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			$consultas = $result ? (int)$result['total'] : 0;
+		}
+		
+		// 3. Finalizadas: consultas de hoy que tienen diagnóstico, receta y observaciones
+		$finalizadas = 0;
+		$stmt = $pdo->prepare('
+			SELECT COUNT(*) as total
+			FROM consultas
+			WHERE DATE(fecha_consulta) = ?
+			AND diagnostico IS NOT NULL AND diagnostico != ""
+			AND receta IS NOT NULL AND receta != ""
+			AND observaciones IS NOT NULL AND observaciones != ""
+		');
+		$stmt->execute([$hoy]);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$finalizadas = $result ? (int)$result['total'] : 0;
+		
+		responder([
+			'citas_hoy' => $citasHoy,
+			'consultas' => $consultas,
+			'finalizadas' => $finalizadas
+		]);
 	}
 }
 

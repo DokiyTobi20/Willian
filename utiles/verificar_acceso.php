@@ -18,10 +18,7 @@ const PERMISOS_PANEL = [
     ],
     2 => [ // Doctor
         'inicio/inicio',
-        'citas/citas',
-        'consultas/consultas_main',
-        'especialidades/especialidades',
-        'doctores/doctores',
+        'consultas/consultas',
     ],
     3 => [ // Administrador
         '*',

@@ -54,7 +54,7 @@ try {
 
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="busquedaDoctor" placeholder="Buscar por nombre, cédula, especialidad...">
+            <input type="text" id="busquedaDoctor" placeholder="Buscar por doctor (nombre o cédula)...">
             <i class='bx bx-search'></i>
         </div>
 
@@ -85,36 +85,47 @@ try {
         </div>
     </div>
 
-    <div class="doctors-grid" id="doctoresGrid">
-        <?php if (empty($doctores)): ?>
-            <div class="no-doctores" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                <i class='bx bx-user-x' style="font-size: 64px; color: #ccc; margin-bottom: 20px;"></i>
-                <h3>No hay doctores registrados</h3>
-                <p>Comienza agregando el primer doctor médico.</p>
-            </div>
-        <?php else: ?>
-            <?php foreach ($doctores as $doctor): ?>
-                <div class="doctor-card" data-doctor-id="<?= $doctor['id'] ?>">
-                    <div class="doctor-info">
-                        <h4><?= htmlspecialchars($doctor['nombre'] . ' ' . $doctor['apellido']) ?></h4>
-                        <p><i class='bx bx-id-card'></i> <?= htmlspecialchars($doctor['cedula']) ?></p>
-                        <p><i class='bx bx-envelope'></i> <?= htmlspecialchars($doctor['correo'] ?? 'N/A') ?></p>
-                        <p><i class='bx bx-plus-medical'></i> <?= htmlspecialchars($doctor['especialidad'] ?? 'Sin especialidad') ?></p>
-                        <?php if (!empty($doctor['telefono'])): ?>
-                            <p><i class='bx bx-phone'></i> <?= htmlspecialchars($doctor['telefono']) ?></p>
-                        <?php endif; ?>
-                    </div>
-                    <div class="doctor-actions">
-                        <button class="btn-edit" onclick="editarDoctor(<?= $doctor['id'] ?>)">
-                            <i class='bx bx-edit'></i> Editar
-                        </button>
-                        <button class="btn-delete" onclick="eliminarDoctor(<?= $doctor['id'] ?>, '<?= htmlspecialchars($doctor['nombre'] . ' ' . $doctor['apellido'], ENT_QUOTES) ?>')">
-                            <i class='bx bx-trash'></i> Eliminar
-                        </button>
-                    </div>
+    <!-- Doctores Table/Grid -->
+    <div class="doctores-table">
+        <div class="table-header">
+            <h2>Doctores Registrados</h2>
+        </div>
+        <div class="table-container">
+            <?php if (empty($doctores)): ?>
+                <div class="no-doctores">
+                    <i class='bx bx-user-x'></i>
+                    <h3>No hay doctores registrados</h3>
+                    <p>Comienza agregando el primer doctor médico.</p>
                 </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+            <?php else: ?>
+                <div class="resultados-info" style="margin-bottom: 15px; color:#6c757d;">
+                    <span class="contador"><?= $totalDoctores ?> doctor<?= $totalDoctores !== 1 ? 'es' : '' ?> registrado<?= $totalDoctores !== 1 ? 's' : '' ?></span>
+                </div>
+                <div class="doctors-grid" id="doctoresGrid">
+                    <?php foreach ($doctores as $doctor): ?>
+                        <div class="doctor-card" data-doctor-id="<?= $doctor['id'] ?>" <?= !empty($doctor['id_especialidad']) ? 'data-especialidad-id="' . (int)$doctor['id_especialidad'] . '"' : '' ?>>
+                            <div class="doctor-info">
+                                <h4><?= htmlspecialchars($doctor['nombre'] . ' ' . $doctor['apellido']) ?></h4>
+                                <p><i class='bx bx-id-card'></i> <?= htmlspecialchars($doctor['cedula']) ?></p>
+                                <p><i class='bx bx-envelope'></i> <?= htmlspecialchars($doctor['correo'] ?? 'N/A') ?></p>
+                                <p><i class='bx bx-plus-medical'></i> <?= htmlspecialchars($doctor['especialidad'] ?? 'Sin especialidad') ?></p>
+                                <?php if (!empty($doctor['telefono'])): ?>
+                                    <p><i class='bx bx-phone'></i> <?= htmlspecialchars($doctor['telefono']) ?></p>
+                                <?php endif; ?>
+                            </div>
+                            <div class="doctor-actions">
+                                <button class="btn-edit" onclick="editarDoctor(<?= $doctor['id'] ?>)">
+                                    <i class='bx bx-edit'></i> Editar
+                                </button>
+                                <button class="btn-delete" onclick="eliminarDoctor(<?= $doctor['id'] ?>, '<?= htmlspecialchars($doctor['nombre'] . ' ' . $doctor['apellido'], ENT_QUOTES) ?>')">
+                                    <i class='bx bx-trash'></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
