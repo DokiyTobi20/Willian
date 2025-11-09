@@ -45,8 +45,8 @@
         // Habilitar/deshabilitar los campos de hora según el checkbox de cada día
         document.querySelectorAll('.schedule-day').forEach(day => {
             const checkbox = day.querySelector('input[type="checkbox"]');
-            const horaInicio = day.querySelector('input[name^="hora_inicio"]');
-            const horaFin = day.querySelector('input[name^="hora_fin"]');
+            const horaInicio = day.querySelector('select[name^="hora_inicio"]');
+            const horaFin = day.querySelector('select[name^="hora_fin"]');
             if (checkbox && horaInicio && horaFin) {
                 checkbox.addEventListener('change', function() {
                     horaInicio.disabled = !checkbox.checked;
@@ -312,8 +312,8 @@
             document.querySelectorAll('.schedule-day input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = false;
                 const day = checkbox.closest('.schedule-day');
-                const horaInicio = day.querySelector('input[name^="hora_inicio"]');
-                const horaFin = day.querySelector('input[name^="hora_fin"]');
+                const horaInicio = day.querySelector('select[name^="hora_inicio"]');
+                const horaFin = day.querySelector('select[name^="hora_fin"]');
                 if (horaInicio) horaInicio.disabled = true;
                 if (horaFin) horaFin.disabled = true;
             });
@@ -372,8 +372,8 @@
         diasMarcados.forEach(checkbox => {
             const day = checkbox.closest('.schedule-day');
             const dia = checkbox.value;
-            const horaInicio = day.querySelector(`input[name="hora_inicio[${dia}]"]`);
-            const horaFin = day.querySelector(`input[name="hora_fin[${dia}]"]`);
+            const horaInicio = day.querySelector(`select[name="hora_inicio[${dia}]"]`);
+            const horaFin = day.querySelector(`select[name="hora_fin[${dia}]"]`);
             
             if (checkbox.checked) {
                 if (!horaInicio.value || !horaFin.value) {
@@ -445,8 +445,8 @@
             diasMarcados.forEach(checkbox => {
                 const dia = checkbox.value;
                 const dayContainer = checkbox.closest('.schedule-day');
-                const horaInicioInput = dayContainer.querySelector(`input[name="hora_inicio[${dia}]"]`);
-                const horaFinInput = dayContainer.querySelector(`input[name="hora_fin[${dia}]"]`);
+                const horaInicioInput = dayContainer.querySelector(`select[name="hora_inicio[${dia}]"]`);
+                const horaFinInput = dayContainer.querySelector(`select[name="hora_fin[${dia}]"]`);
                 
                 const horaInicio = horaInicioInput ? horaInicioInput.value : null;
                 const horaFin = horaFinInput ? horaFinInput.value : null;
@@ -779,8 +779,8 @@
                 checkbox.checked = false;
                 const day = checkbox.closest('.schedule-day');
                 const dia = checkbox.value;
-                const horaInicio = day.querySelector(`input[name="hora_inicio[${dia}]"]`);
-                const horaFin = day.querySelector(`input[name="hora_fin[${dia}]"]`);
+                const horaInicio = day.querySelector(`select[name="hora_inicio[${dia}]"]`);
+                const horaFin = day.querySelector(`select[name="hora_fin[${dia}]"]`);
                 if (horaInicio) {
                     horaInicio.disabled = true;
                     horaInicio.value = '';
@@ -801,16 +801,17 @@
                     if (checkbox) {
                         checkbox.checked = true;
                         const day = checkbox.closest('.schedule-day');
-                        const horaInicio = day.querySelector(`input[name="hora_inicio[${diaNum}]"]`);
-                        const horaFin = day.querySelector(`input[name="hora_fin[${diaNum}]"]`);
+                        const horaInicio = day.querySelector(`select[name="hora_inicio[${diaNum}]"]`);
+                        const horaFin = day.querySelector(`select[name="hora_fin[${diaNum}]"]`);
                         
                         if (horaInicio && horario.hora_inicio_am) {
                             horaInicio.disabled = false;
-                            // Convertir hora TIME a formato HH:MM para input type="time"
+                            // Convertir hora TIME a formato HH:00 para select
                             const horaInicioValue = horario.hora_inicio_am;
                             if (horaInicioValue) {
-                                // Si viene en formato "HH:MM:SS", tomar solo "HH:MM"
-                                horaInicio.value = horaInicioValue.substring(0, 5);
+                                // Si viene en formato "HH:MM:SS", tomar solo "HH:00"
+                                const hora = horaInicioValue.substring(0, 2);
+                                horaInicio.value = hora + ':00';
                             }
                         }
                         
@@ -818,7 +819,9 @@
                             horaFin.disabled = false;
                             const horaFinValue = horario.hora_fin_am;
                             if (horaFinValue) {
-                                horaFin.value = horaFinValue.substring(0, 5);
+                                // Si viene en formato "HH:MM:SS", tomar solo "HH:00"
+                                const hora = horaFinValue.substring(0, 2);
+                                horaFin.value = hora + ':00';
                             }
                         }
                     }

@@ -196,9 +196,7 @@ try {
                             2 => 'Martes',
                             3 => 'Miércoles',
                             4 => 'Jueves',
-                            5 => 'Viernes',
-                            6 => 'Sábado',
-                            7 => 'Domingo'
+                            5 => 'Viernes'
                         ];
                         foreach ($dias as $num => $nombre): ?>
                         <div class="schedule-day">
@@ -209,11 +207,55 @@ try {
                             <div class="time-inputs">
                                 <div class="time-group">
                                     <label>Hora inicio</label>
-                                    <input type="time" name="hora_inicio[<?= $num ?>]" disabled>
+                                    <select name="hora_inicio[<?= $num ?>]" disabled style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                        <option value="">Seleccione...</option>
+                                        <?php 
+                                        // Horas de 6:00 AM a 11:00 AM
+                                        for ($h = 6; $h <= 11; $h++): 
+                                            $hora24 = sprintf('%02d:00', $h);
+                                            $hora12 = sprintf('%d:00 AM', $h);
+                                        ?>
+                                            <option value="<?= $hora24 ?>"><?= $hora12 ?></option>
+                                        <?php endfor; ?>
+                                        <?php 
+                                        // 12:00 PM (mediodía)
+                                        ?>
+                                        <option value="12:00">12:00 PM</option>
+                                        <?php 
+                                        // Horas de 1:00 PM a 2:00 PM
+                                        for ($h = 13; $h <= 14; $h++): 
+                                            $hora24 = sprintf('%02d:00', $h);
+                                            $hora12 = sprintf('%d:00 PM', $h - 12);
+                                        ?>
+                                            <option value="<?= $hora24 ?>"><?= $hora12 ?></option>
+                                        <?php endfor; ?>
+                                    </select>
                                 </div>
                                 <div class="time-group">
                                     <label>Hora fin</label>
-                                    <input type="time" name="hora_fin[<?= $num ?>]" disabled>
+                                    <select name="hora_fin[<?= $num ?>]" disabled style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                        <option value="">Seleccione...</option>
+                                        <?php 
+                                        // Horas de 6:00 AM a 11:00 AM
+                                        for ($h = 6; $h <= 11; $h++): 
+                                            $hora24 = sprintf('%02d:00', $h);
+                                            $hora12 = sprintf('%d:00 AM', $h);
+                                        ?>
+                                            <option value="<?= $hora24 ?>"><?= $hora12 ?></option>
+                                        <?php endfor; ?>
+                                        <?php 
+                                        // 12:00 PM (mediodía)
+                                        ?>
+                                        <option value="12:00">12:00 PM</option>
+                                        <?php 
+                                        // Horas de 1:00 PM a 2:00 PM
+                                        for ($h = 13; $h <= 14; $h++): 
+                                            $hora24 = sprintf('%02d:00', $h);
+                                            $hora12 = sprintf('%d:00 PM', $h - 12);
+                                        ?>
+                                            <option value="<?= $hora24 ?>"><?= $hora12 ?></option>
+                                        <?php endfor; ?>
+                                    </select>
                                 </div>
                             </div>
                         </div>
