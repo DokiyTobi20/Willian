@@ -410,7 +410,6 @@ select.invalid {
 }
 
 .modal-content {
-  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   width: 75vw;
@@ -773,8 +772,7 @@ body.index-page .btn {
 /* Modal más grande horizontalmente */
 body.index-page .modal-content,
 body.index-page .overlay .modal-content {
-  width: 99vw;
-  max-width: 700px;
+  width: 90vw;
   min-width: 320px;
   height: 90vh;
   max-height: 90vh;
