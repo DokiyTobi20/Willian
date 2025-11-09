@@ -51,7 +51,7 @@ body {
 }
 
 .container-form span {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     margin-bottom: 1.8rem;
 }
 
@@ -147,6 +147,7 @@ body {
     height: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
     transform: translateX(100%);
     background-color: #209677;
     transition: transform 0.5s ease-in-out, border-radius 0.5s ease-in-out;
@@ -227,15 +228,15 @@ body {
 /* Responsive */
 @media (max-width: 1200px) {
     .container {
-        width: 85vw;
-        height: 85vh;
+        width: 100vw;
+        height: 100vh;
     }
 }
 
 @media (max-width: 900px) {
     .container {
-        width: 95vw;
-        height: 95vh;
+        width: 100vw;
+        height: 100vh;
     }
     
     .container-input {

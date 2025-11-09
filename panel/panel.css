@@ -21,7 +21,7 @@
 
 /* Panel y dashboard styles movidos desde estilos.css */
 .menu-dashboard {
-	width: 320px;
+	width: 250px;
 	height: 100dvh;
 	min-height: 0 !important;
 	max-height: 100dvh !important;
