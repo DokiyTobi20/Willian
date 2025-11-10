@@ -32,12 +32,13 @@ if (isset($_SESSION['usuario'])) {
       <div class="nav__logo">
         Sala de Rehabilitación Integral<br />Padre Chacín
       </div>
-      <ul class="nav__links">
+      <!--<ul class="nav__links">
         <li class="link"><a href="#">Inicio</a></li>
         <li class="link"><a href="#">Sobre Nosotros</a></li>
         <li class="link"><a href="#">Blog</a></li>
         <li class="link"><a href="#">Contacto</a></li>
       </ul>
+        -->
       <div class="nav__buttons">
         <button class="btn" onclick="openModal('acceso/acceso.php')">Iniciar Sesión</button>
       </div>
@@ -53,8 +54,10 @@ if (isset($_SESSION['usuario'])) {
         <button class="btn" onclick="openModal('acceso/acceso.php?form=register')">Regístrate para obtener nuestros servicios</button>
       </div>
       <div class="image">
-        <span class="image__bg"></span>
+        <span class="image__bg">
         <img src="imagenes/imagen_inicio.png" alt="Imagen de inicio" />
+
+        </span>
         <div class="image__content image__content__1">
           <span><i class="ri-user-3-line"></i></span>
           <div class="details">
@@ -86,6 +89,20 @@ if (isset($_SESSION['usuario'])) {
         </div>
       </div>
     </header>
+
+    <footer>
+      <div class="footer__logo">
+        Todos los derechos reservados &#169; 2025
+      </div>
+      <!--<ul class="nav__links">
+        <li class="link"><a href="#">Inicio</a></li>
+        <li class="link"><a href="#">Sobre Nosotros</a></li>
+        <li class="link"><a href="#">Blog</a></li>
+        <li class="link"><a href="#">Contacto</a></li>
+      </ul>
+        -->
+      
+    </footer>
   </div>
 
   <div id="overlay" class="overlay" aria-hidden="true">
